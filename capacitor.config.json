@@ -1,0 +1,11 @@
+{
+  "appId": "com.mustafa.neoncore",
+  "appName": "Neon Core",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}
