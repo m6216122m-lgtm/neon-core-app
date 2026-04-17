@@ -12,7 +12,7 @@
     <script src="config.js"></script>
     <script>
       // AdMob köprüsü hazır mı kontrolü için global flag
-      window.ADMOB_READY = true;
+      window.ADMOB_READY = false;
 
       // Eğer config.js yüklenemezse default test ID'leri kullan (oyun yine açılsın)
       if (!window.GAME_CONFIG) {
@@ -357,67 +357,117 @@
             lastAdTimestamp = Date.now();
         }
 
-        // AdMob plugin'in hazır olmasını bekle
+        // AdMob plugin'in hazır olmasını bekle (Capacitor deviceready ile gelir)
         document.addEventListener('deviceready', initAdMob, false);
+        // Capacitor'da deviceready bazen gelmez - DOMContentLoaded'da da dene
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            setTimeout(initAdMob, 500);
+        } else {
+            document.addEventListener('DOMContentLoaded', () => setTimeout(initAdMob, 500));
+        }
 
-        // Eğer Cordova/Capacitor olmadan tarayıcıda test ediliyorsa fallback
+        // Eğer Capacitor olmadan tarayıcıda test ediliyorsa fallback
         setTimeout(() => {
             if (!admobReady) {
-                console.log("[AdMob] Plugin yok - browser/test modu");
+                console.log("[AdMob] Plugin yok veya init olamadı - browser/test modu");
             }
-        }, 3000);
+        }, 5000);
 
         async function initAdMob() {
+            if (admobReady) return; // Zaten init edildi
             try {
-                // cordova-plugin-admob-plus API
-                if (typeof admob !== 'undefined') {
-                    await admob.start();
-
-                    // İnterstitial hazırla
-                    window.appInterstitial = new admob.InterstitialAd({
-                        adUnitId: ADMOB_CONFIG.interstitialId
-                    });
-                    window.appInterstitial.on('load', () => { interstitialLoaded = true; });
-                    window.appInterstitial.on('dismiss', () => {
-                        interstitialLoaded = false;
-                        window.appInterstitial.load(); // Bir sonraki için yükle
-                        if (window._pendingInterstitialCb) {
-                            const cb = window._pendingInterstitialCb;
-                            window._pendingInterstitialCb = null;
-                            cb(true);
-                        }
-                    });
-                    await window.appInterstitial.load();
-
-                    // Rewarded hazırla
-                    window.appRewarded = new admob.RewardedAd({
-                        adUnitId: ADMOB_CONFIG.rewardedId
-                    });
-                    window.appRewarded.on('load', () => { rewardedLoaded = true; });
-                    window.appRewarded.on('reward', () => {
-                        if (window._pendingRewardCb) {
-                            const cb = window._pendingRewardCb;
-                            window._pendingRewardCb = null;
-                            cb(true);
-                        }
-                    });
-                    window.appRewarded.on('dismiss', () => {
-                        rewardedLoaded = false;
-                        window.appRewarded.load();
-                        // Reward verilmeden kapatıldıysa fail callback
-                        if (window._pendingRewardFailCb) {
-                            const cb = window._pendingRewardFailCb;
-                            window._pendingRewardFailCb = null;
-                            window._pendingRewardCb = null;
-                            cb();
-                        }
-                    });
-                    await window.appRewarded.load();
-
-                    admobReady = true;
-                    window.ADMOB_READY = true;
-                    console.log("[AdMob] Initialized successfully");
+                // Capacitor plugin'ini bul
+                const Capacitor = window.Capacitor;
+                if (!Capacitor || !Capacitor.isNativePlatform || !Capacitor.isNativePlatform()) {
+                    console.log("[AdMob] Native platform değil (web browser)");
+                    return;
                 }
+
+                // @capacitor-community/admob plugin'i yüklü mü kontrol et
+                const AdMob = Capacitor.Plugins.AdMob;
+                if (!AdMob) {
+                    console.log("[AdMob] AdMob plugin bulunamadı");
+                    return;
+                }
+
+                // Plugin'i başlat
+                await AdMob.initialize({
+                    requestTrackingAuthorization: false,
+                    testingDevices: [],
+                    initializeForTesting: false
+                });
+                console.log("[AdMob] Initialized");
+
+                // Global referansı sakla
+                window.AdMobPlugin = AdMob;
+
+                // Interstitial event listener'ları
+                AdMob.addListener('interstitialAdLoaded', () => {
+                    interstitialLoaded = true;
+                    console.log("[AdMob] Interstitial loaded");
+                });
+                AdMob.addListener('interstitialAdFailedToLoad', (err) => {
+                    interstitialLoaded = false;
+                    console.log("[AdMob] Interstitial failed:", err);
+                });
+                AdMob.addListener('interstitialAdDismissed', () => {
+                    interstitialLoaded = false;
+                    muteGameAudio(false);
+                    // Bir sonrakini yükle
+                    AdMob.prepareInterstitial({ adId: ADMOB_CONFIG.interstitialId }).catch(e => console.log(e));
+                    if (window._pendingInterstitialCb) {
+                        const cb = window._pendingInterstitialCb;
+                        window._pendingInterstitialCb = null;
+                        markAdShown();
+                        cb(true);
+                    }
+                });
+
+                // Rewarded event listener'ları
+                AdMob.addListener('rewardedVideoAdLoaded', () => {
+                    rewardedLoaded = true;
+                    console.log("[AdMob] Rewarded loaded");
+                });
+                AdMob.addListener('rewardedVideoAdFailedToLoad', (err) => {
+                    rewardedLoaded = false;
+                    console.log("[AdMob] Rewarded failed:", err);
+                });
+                AdMob.addListener('rewardedVideoAdReward', (reward) => {
+                    console.log("[AdMob] Reward earned:", reward);
+                    window._rewardEarned = true;
+                });
+                AdMob.addListener('rewardedVideoAdDismissed', () => {
+                    rewardedLoaded = false;
+                    muteGameAudio(false);
+                    // Bir sonrakini yükle
+                    AdMob.prepareRewardVideoAd({ adId: ADMOB_CONFIG.rewardedId }).catch(e => console.log(e));
+                    // Reward alındıysa success, yoksa fail
+                    if (window._rewardEarned && window._pendingRewardCb) {
+                        const cb = window._pendingRewardCb;
+                        window._pendingRewardCb = null;
+                        window._pendingRewardFailCb = null;
+                        window._rewardEarned = false;
+                        cb();
+                    } else if (window._pendingRewardFailCb) {
+                        const cb = window._pendingRewardFailCb;
+                        window._pendingRewardCb = null;
+                        window._pendingRewardFailCb = null;
+                        cb();
+                    }
+                });
+
+                // İlk reklamları önceden yükle
+                try {
+                    await AdMob.prepareInterstitial({ adId: ADMOB_CONFIG.interstitialId });
+                } catch(e) { console.log("[AdMob] prepareInterstitial:", e); }
+
+                try {
+                    await AdMob.prepareRewardVideoAd({ adId: ADMOB_CONFIG.rewardedId });
+                } catch(e) { console.log("[AdMob] prepareRewardVideoAd:", e); }
+
+                admobReady = true;
+                window.ADMOB_READY = true;
+                console.log("[AdMob] Ready to show ads");
             } catch (e) {
                 console.log("[AdMob] Init error:", e);
             }
@@ -432,58 +482,52 @@
         function crazyLoadingStop() { /* no-op */ }
 
         // ========== INTERSTITIAL (Midgame) Reklam ==========
-        function crazyMidgameAd(callback) {
+        async function crazyMidgameAd(callback) {
             if (!canShowAd()) {
                 if (callback) callback(false);
                 return;
             }
-            if (admobReady && interstitialLoaded && window.appInterstitial) {
+            if (admobReady && interstitialLoaded && window.AdMobPlugin) {
                 try {
                     muteGameAudio(true);
                     window._pendingInterstitialCb = (success) => {
-                        markAdShown();
-                        muteGameAudio(false);
                         if (callback) callback(success);
                     };
-                    window.appInterstitial.show();
+                    await window.AdMobPlugin.showInterstitial();
                 } catch (e) {
                     console.log("[AdMob] Interstitial error:", e);
                     muteGameAudio(false);
+                    window._pendingInterstitialCb = null;
                     if (callback) callback(false);
                 }
             } else {
                 // Hazır değilse skip - kullanıcı deneyimini bozma
+                console.log("[AdMob] Interstitial not ready, skipping");
                 if (callback) callback(false);
             }
         }
 
         // ========== REWARDED (Ödüllü) Reklam ==========
-        function crazyRewardedAd(onSuccess, onFail) {
-            if (admobReady && rewardedLoaded && window.appRewarded) {
+        async function crazyRewardedAd(onSuccess, onFail) {
+            if (admobReady && rewardedLoaded && window.AdMobPlugin) {
                 try {
                     muteGameAudio(true);
-                    window._pendingRewardCb = (rewarded) => {
-                        muteGameAudio(false);
-                        if (rewarded && onSuccess) onSuccess();
-                    };
-                    window._pendingRewardFailCb = () => {
-                        muteGameAudio(false);
-                        // Eğer reward callback hiç çağrılmadıysa fail say
-                        if (window._pendingRewardCb) {
-                            window._pendingRewardCb = null;
-                            if (onFail) onFail();
-                        }
-                    };
-                    window.appRewarded.show();
+                    window._rewardEarned = false;
+                    window._pendingRewardCb = onSuccess;
+                    window._pendingRewardFailCb = onFail;
+                    await window.AdMobPlugin.showRewardVideoAd();
                 } catch (e) {
                     console.log("[AdMob] Rewarded error:", e);
                     muteGameAudio(false);
+                    window._pendingRewardCb = null;
+                    window._pendingRewardFailCb = null;
                     if (onFail) onFail();
                 }
             } else {
-                // Test/preview modu: direkt ödülü ver
-                console.log("[AdMob] Rewarded not ready - giving reward in test mode");
-                if (onSuccess) onSuccess();
+                // Rewarded hazır değilse, kullanıcıya test modu ödülü verme!
+                // Bunun yerine fail et ki kullanıcı tekrar denesin
+                console.log("[AdMob] Rewarded not ready - telling user to retry");
+                if (onFail) onFail();
             }
         }
 
