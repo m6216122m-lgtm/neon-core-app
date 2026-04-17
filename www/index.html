@@ -358,12 +358,18 @@
         }
 
         // AdMob plugin'in hazır olmasını bekle (Capacitor deviceready ile gelir)
-        document.addEventListener('deviceready', initAdMob, false);
+        let _adMobInitTriggered = false;
+        function triggerAdMobInit() {
+            if (_adMobInitTriggered) return;
+            _adMobInitTriggered = true;
+            initAdMob();
+        }
+        document.addEventListener('deviceready', triggerAdMobInit, false);
         // Capacitor'da deviceready bazen gelmez - DOMContentLoaded'da da dene
         if (document.readyState === 'complete' || document.readyState === 'interactive') {
-            setTimeout(initAdMob, 500);
+            setTimeout(triggerAdMobInit, 500);
         } else {
-            document.addEventListener('DOMContentLoaded', () => setTimeout(initAdMob, 500));
+            document.addEventListener('DOMContentLoaded', () => setTimeout(triggerAdMobInit, 500));
         }
 
         // Eğer Capacitor olmadan tarayıcıda test ediliyorsa fallback
@@ -396,7 +402,9 @@
                     testingDevices: [],
                     initializeForTesting: false
                 });
-                console.log("[AdMob] Initialized");
+                console.log("[AdMob] Initialize() complete");
+                console.log("[AdMob] Using interstitialId:", ADMOB_CONFIG.interstitialId);
+                console.log("[AdMob] Using rewardedId:", ADMOB_CONFIG.rewardedId);
 
                 // Global referansı sakla
                 window.AdMobPlugin = AdMob;
@@ -404,17 +412,16 @@
                 // Interstitial event listener'ları
                 AdMob.addListener('interstitialAdLoaded', () => {
                     interstitialLoaded = true;
-                    console.log("[AdMob] Interstitial loaded");
+                    console.log("✓ Interstitial LOADED");
                 });
                 AdMob.addListener('interstitialAdFailedToLoad', (err) => {
                     interstitialLoaded = false;
-                    console.log("[AdMob] Interstitial failed:", err);
+                    console.error("Interstitial FAILED:", JSON.stringify(err));
                 });
                 AdMob.addListener('interstitialAdDismissed', () => {
                     interstitialLoaded = false;
                     muteGameAudio(false);
-                    // Bir sonrakini yükle
-                    AdMob.prepareInterstitial({ adId: ADMOB_CONFIG.interstitialId }).catch(e => console.log(e));
+                    AdMob.prepareInterstitial({ adId: ADMOB_CONFIG.interstitialId }).catch(e => console.error("re-prepare interstitial:", e));
                     if (window._pendingInterstitialCb) {
                         const cb = window._pendingInterstitialCb;
                         window._pendingInterstitialCb = null;
@@ -426,22 +433,20 @@
                 // Rewarded event listener'ları
                 AdMob.addListener('rewardedVideoAdLoaded', () => {
                     rewardedLoaded = true;
-                    console.log("[AdMob] Rewarded loaded");
+                    console.log("✓ Rewarded LOADED");
                 });
                 AdMob.addListener('rewardedVideoAdFailedToLoad', (err) => {
                     rewardedLoaded = false;
-                    console.log("[AdMob] Rewarded failed:", err);
+                    console.error("Rewarded FAILED:", JSON.stringify(err));
                 });
                 AdMob.addListener('rewardedVideoAdReward', (reward) => {
-                    console.log("[AdMob] Reward earned:", reward);
+                    console.log("✓ Reward earned:", JSON.stringify(reward));
                     window._rewardEarned = true;
                 });
                 AdMob.addListener('rewardedVideoAdDismissed', () => {
                     rewardedLoaded = false;
                     muteGameAudio(false);
-                    // Bir sonrakini yükle
-                    AdMob.prepareRewardVideoAd({ adId: ADMOB_CONFIG.rewardedId }).catch(e => console.log(e));
-                    // Reward alındıysa success, yoksa fail
+                    AdMob.prepareRewardVideoAd({ adId: ADMOB_CONFIG.rewardedId }).catch(e => console.error("re-prepare rewarded:", e));
                     if (window._rewardEarned && window._pendingRewardCb) {
                         const cb = window._pendingRewardCb;
                         window._pendingRewardCb = null;
@@ -456,20 +461,28 @@
                     }
                 });
 
-                // İlk reklamları önceden yükle
-                try {
-                    await AdMob.prepareInterstitial({ adId: ADMOB_CONFIG.interstitialId });
-                } catch(e) { console.log("[AdMob] prepareInterstitial:", e); }
-
-                try {
-                    await AdMob.prepareRewardVideoAd({ adId: ADMOB_CONFIG.rewardedId });
-                } catch(e) { console.log("[AdMob] prepareRewardVideoAd:", e); }
-
                 admobReady = true;
                 window.ADMOB_READY = true;
-                console.log("[AdMob] Ready to show ads");
+                console.log("[AdMob] Ready, preparing first ads...");
+
+                // İlk reklamları yüklemeyi dene
+                try {
+                    console.log("[AdMob] Calling prepareInterstitial...");
+                    const r1 = await AdMob.prepareInterstitial({ adId: ADMOB_CONFIG.interstitialId });
+                    console.log("[AdMob] prepareInterstitial returned:", JSON.stringify(r1));
+                } catch(e) {
+                    console.error("prepareInterstitial CATCH:", e.message || JSON.stringify(e));
+                }
+
+                try {
+                    console.log("[AdMob] Calling prepareRewardVideoAd...");
+                    const r2 = await AdMob.prepareRewardVideoAd({ adId: ADMOB_CONFIG.rewardedId });
+                    console.log("[AdMob] prepareRewardVideoAd returned:", JSON.stringify(r2));
+                } catch(e) {
+                    console.error("prepareRewardVideoAd CATCH:", e.message || JSON.stringify(e));
+                }
             } catch (e) {
-                console.log("[AdMob] Init error:", e);
+                console.error("[AdMob] Init error:", e.message || JSON.stringify(e));
             }
         }
 
