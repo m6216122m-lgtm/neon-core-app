@@ -34,7 +34,7 @@ window.GAME_CONFIG = {
     // adresinden leaderboard oluşturup ID'yi buraya yapıştır
     playGames: {
         // Açmak istemiyorsan false yap
-        enabled: true,
+        enabled: false,
 
         // Leaderboard ID (örnek: 'CgkI1abc2defgEAIQAQ')
         // Boş bırakırsan global leaderboard çalışmaz
