@@ -13,18 +13,18 @@ window.GAME_CONFIG = {
     admob: {
         // App ID (genellikle ~ ile biter)
         // Örnek: 'ca-app-pub-1234567890123456~1234567890'
-        appId: 'ca-app-pub-3940256099942544~3347511713',
+        appId: 'ca-app-pub-2971728276885421~8192560253',
 
         // Interstitial Ad Unit ID (oyun aralarında gösterilen tam ekran reklam)
         // Örnek: 'ca-app-pub-1234567890123456/9876543210'
-        interstitialId: 'ca-app-pub-3940256099942544/1033173712',
+        interstitialId: 'ca-app-pub-2971728276885421~8192560253',
 
         // Rewarded Ad Unit ID (ödüllü reklam - 2x coin, free coin için)
         // Örnek: 'ca-app-pub-1234567890123456/5555555555'
-        rewardedId: 'ca-app-pub-3940256099942544/5224354917',
+        rewardedId: 'ca-app-pub-2971728276885421~8192560253',
 
         // Banner Ad Unit ID (şu an kullanılmıyor, opsiyonel)
-        bannerId: 'ca-app-pub-3940256099942544/6300978111'
+        bannerId: 'ca-app-pub-2971728276885421~8192560253'
     },
 
     // -----------------------------------------------------
