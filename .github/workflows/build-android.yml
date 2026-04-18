@@ -62,63 +62,46 @@ jobs:
             echo "⚠️ KEYSTORE_BASE64 secret eksik - release AAB üretilmeyecek"
             echo "RELEASE_ENABLED=false" >> $GITHUB_ENV
           else
-            mkdir -p android/keystore
-            echo "$KEYSTORE_BASE64" | base64 -d > android/keystore/release.jks
-            echo "✓ Keystore decoded"
+            mkdir -p android/app
+            echo "$KEYSTORE_BASE64" | base64 -d > android/app/release.jks
+            echo "✓ Keystore decoded to android/app/release.jks"
+            ls -la android/app/release.jks
             echo "RELEASE_ENABLED=true" >> $GITHUB_ENV
           fi
 
-      - name: Configure signing in build.gradle
+      - name: Build Release AAB (Play Store için - önce imzasız üret)
         if: env.RELEASE_ENABLED == 'true'
         run: |
-          BUILD_GRADLE=android/app/build.gradle
-          if ! grep -q "signingConfigs" $BUILD_GRADLE; then
-            # signingConfigs bloğunu android{} içine ekle
-            python3 << 'PYEOF'
-          with open('android/app/build.gradle', 'r') as f:
-              content = f.read()
+          cd android
+          ./gradlew bundleRelease --no-daemon
 
-          # android { satırının hemen altına signingConfigs ekle
-          signing_block = """
-              signingConfigs {
-                  release {
-                      storeFile file('../keystore/release.jks')
-                      storePassword System.getenv('KEYSTORE_PASSWORD')
-                      keyAlias System.getenv('KEY_ALIAS')
-                      keyPassword System.getenv('KEY_PASSWORD')
-                  }
-              }
-          """
-
-          # buildTypes { release { ... }} içine signingConfig ekle
-          content = content.replace('android {', 'android {' + signing_block, 1)
-
-          # release { } bloğunu bul, içine signingConfig ekle
-          if 'release {' in content:
-              content = content.replace(
-                  'release {',
-                  'release {\n            signingConfig signingConfigs.release',
-                  1
-              )
-
-          with open('android/app/build.gradle', 'w') as f:
-              f.write(content)
-
-          print("✓ build.gradle updated")
-          PYEOF
-          else
-            echo "signingConfigs zaten mevcut"
-          fi
-
-      - name: Build Release AAB (Play Store için)
+      - name: Sign AAB with jarsigner
         if: env.RELEASE_ENABLED == 'true'
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          cd android
-          ./gradlew bundleRelease --no-daemon
+          AAB_PATH="android/app/build/outputs/bundle/release/app-release.aab"
+          if [ ! -f "$AAB_PATH" ]; then
+            echo "❌ AAB bulunamadı: $AAB_PATH"
+            ls -la android/app/build/outputs/bundle/release/ || true
+            exit 1
+          fi
+
+          # Jarsigner ile imzala (AAB için geçerli yöntem)
+          jarsigner -verbose \
+            -sigalg SHA256withRSA \
+            -digestalg SHA-256 \
+            -keystore android/app/release.jks \
+            -storepass "$KEYSTORE_PASSWORD" \
+            -keypass "$KEY_PASSWORD" \
+            "$AAB_PATH" \
+            "$KEY_ALIAS"
+
+          # İmzayı doğrula
+          jarsigner -verify -verbose "$AAB_PATH" | tail -20
+          echo "✓ AAB signed successfully"
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
@@ -136,12 +119,15 @@ jobs:
           retention-days: 30
 
       - name: Build Summary
+        if: always()
         run: |
-          echo "## Build Tamamlandı 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "## Build Sonucu" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Debug APK**: test için telefona kur" >> $GITHUB_STEP_SUMMARY
-          if [ "$RELEASE_ENABLED" == "true" ]; then
-            echo "- **Release AAB**: Google Play Store'a yükle 🚀" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- ⚠️ Release AAB üretilmedi (keystore secrets eksik)" >> $GITHUB_STEP_SUMMARY
+          if [ -f "android/app/build/outputs/apk/debug/app-debug.apk" ]; then
+            SIZE=$(du -h android/app/build/outputs/apk/debug/app-debug.apk | cut -f1)
+            echo "✅ **Debug APK** ($SIZE) - Artifacts'tan indir" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ -f "android/app/build/outputs/bundle/release/app-release.aab" ]; then
+            SIZE=$(du -h android/app/build/outputs/bundle/release/app-release.aab | cut -f1)
+            echo "⭐ **Release AAB** ($SIZE) - Play Store'a yükle" >> $GITHUB_STEP_SUMMARY
           fi
