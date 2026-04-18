@@ -17,7 +17,7 @@ window.GAME_CONFIG = {
 
         // Interstitial Ad Unit ID (oyun aralarında gösterilen tam ekran reklam)
         // Örnek: 'ca-app-pub-1234567890123456/9876543210'
-        interstitialId: 'ca-app-pub-7168645524603352/6028064361',
+        interstitialId: 'ca-app-pub-7168645524603352/4281536729',
 
         // Rewarded Ad Unit ID (ödüllü reklam - 2x coin, free coin için)
         // Örnek: 'ca-app-pub-1234567890123456/5555555555'
