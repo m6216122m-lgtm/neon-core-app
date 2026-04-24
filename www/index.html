@@ -30,31 +30,19 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap');
 
-        body {
-            margin: 0; padding: 0; overflow: hidden;
-            background-color: #0a0c10;
-            color: #ffffff; font-family: 'Segoe UI', Tahoma, sans-serif;
-            user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; -webkit-touch-callout: none;
-            touch-action: none; overscroll-behavior: none;
-        }
+        body { margin: 0; padding: 0; overflow: hidden; background-color: #0a0c10; color: #ffffff; font-family: 'Segoe UI', Tahoma, sans-serif; user-select: none; touch-action: none; overscroll-behavior: none; }
         canvas { display: block; position: absolute; top: 0; left: 0; z-index: 1; width: 100vw; height: 100vh; }
-
         #gameUI { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
-
         #topBar { position: absolute; top: calc(20px + env(safe-area-inset-top)); width: 100%; display: flex; justify-content: space-between; padding: 0 20px; box-sizing: border-box; font-size: 20px; font-weight: bold; pointer-events: auto; font-family: 'Orbitron', sans-serif;}
         #progressContainer { position: absolute; top: calc(55px + env(safe-area-inset-top)); left: 25%; width: 50%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; pointer-events: none; overflow: hidden; }
         #comboDisplay { position: absolute; top: calc(75px + env(safe-area-inset-top)); width: 100%; text-align: center; font-family: 'Orbitron', sans-serif; font-size: 24px; font-weight: 900; color: #ffea00; text-shadow: 0 0 20px rgba(255,234,0,1); opacity: 0; transition: opacity 0.2s, transform 0.2s; pointer-events: none; }
-
         #targetDisplay { position: absolute; top: calc(115px + env(safe-area-inset-top)); width: 100%; text-align: center; font-size: 14px; color: #8b949e; opacity: 0.8; transition: 0.5s; pointer-events: none; font-weight: bold; font-family: 'Orbitron', sans-serif; letter-spacing: 1px;}
         #powerupBar { position: absolute; bottom: calc(30px + env(safe-area-inset-bottom)); width: 100%; display: flex; justify-content: center; gap: 10px; pointer-events: auto; flex-wrap: wrap; padding: 0 10px;}
-
         #progressBar { height: 100%; width: 0%; background: linear-gradient(90deg, #00f3ff, #ffea00); border-radius: 10px; transition: width 0.3s ease; box-shadow: 0 0 10px rgba(0, 243, 255, 0.5); }
         .combo-active { opacity: 1 !important; transform: scale(1.2); }
         .combo-overdrive { color: #EF476F !important; text-shadow: 0 0 25px rgba(239, 71, 111, 1) !important; transform: scale(1.3) !important;}
-
         #pauseBtn { background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; padding: 5px; opacity: 0.7; transition: 0.2s; }
         #pauseBtn:active { transform: scale(0.8); opacity: 1; }
-
         @keyframes pulseBtn { 0% { box-shadow: 0 0 5px rgba(255,255,255,0.1); } 50% { box-shadow: 0 0 15px rgba(255,255,255,0.5); } 100% { box-shadow: 0 0 5px rgba(255,255,255,0.1); } }
         .power-btn { display: flex; background: rgba(10, 12, 16, 0.9); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; color: white; padding: 8px 15px; font-size: 13px; font-weight: bold; cursor: pointer; align-items: center; gap: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); font-family: 'Orbitron', sans-serif; transition: 0.2s;}
         .power-btn.has-charges { animation: pulseBtn 2s infinite; }
@@ -66,23 +54,12 @@
 
         .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; justify-content: center; align-items: center; background-color: rgba(10, 12, 16, 0.98); z-index: 20; text-align: center; backdrop-filter: blur(8px); padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); box-sizing: border-box;}
         .screen.active { display: flex; }
-
         #welcomeScreen { background: linear-gradient(180deg, rgba(0, 243, 255, 0.05) 0%, rgba(10, 12, 16, 1) 100%); }
-        .cyber-grid {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-            background-image:
-                linear-gradient(rgba(0, 243, 255, 0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 243, 255, 0.1) 1px, transparent 1px);
-            background-size: 40px 40px;
-            animation: moveGrid 15s linear infinite;
-            opacity: 0.5;
-        }
+        .cyber-grid { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background-image: linear-gradient(rgba(0, 243, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 243, 255, 0.1) 1px, transparent 1px); background-size: 40px 40px; animation: moveGrid 15s linear infinite; opacity: 0.5; }
         @keyframes moveGrid { from { background-position: 0 0; } to { background-position: 40px 40px; } }
-
         h1 { font-family: 'Orbitron', sans-serif; font-size: 42px; margin: 0 0 10px 0; color: #fff; text-transform: uppercase; letter-spacing: 3px; text-shadow: 0 0 20px rgba(0, 243, 255, 0.8); animation: pulseGlow 2s infinite alternate;}
         @keyframes pulseGlow { 0% { text-shadow: 0 0 15px rgba(0, 243, 255, 0.6); } 100% { text-shadow: 0 0 30px rgba(0, 243, 255, 1); } }
         h2 { font-size: 18px; margin: 0 0 15px 0; color: #8b949e; letter-spacing: 2px; text-transform: uppercase;}
-
         .box { background: rgba(255,255,255,0.03); border: 1px solid rgba(0, 243, 255, 0.2); padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 25px; width: 260px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); backdrop-filter: blur(10px);}
         .coin-text { color: #ffea00; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 24px; text-shadow: 0 0 15px rgba(255,234,0,0.4); margin: 10px 0;}
 
@@ -91,17 +68,14 @@
         button.action-btn.secondary { background: rgba(255,255,255,0.05); color: #c9d1d9; box-shadow: none; border: 1px solid rgba(255,255,255,0.15); }
         button.action-btn.secondary:active { background: rgba(255,255,255,0.1); border-color: #00f3ff; color: #00f3ff;}
         button.action-btn.survival { background: linear-gradient(45deg, #aa00ff, #EF476F); color: white; box-shadow: 0 5px 20px rgba(239, 71, 111, 0.5); }
-
         button.action-btn.buy { background: linear-gradient(45deg, #ffea00, #f39c12); font-size: 12px; width: 100%; margin: 3px 0; padding: 8px; border-radius: 20px; }
         button.action-btn.ad { background: linear-gradient(45deg, #00C9FF, #92FE9D); color: #0a0c10; font-size: 11px; width: 100%; margin: 3px 0; padding: 6px; border-radius: 20px; }
-
         button.action-btn.revive { background: linear-gradient(45deg, #EF476F, #ff0055); color: white; margin-bottom: 10px;}
         button.action-btn.invite { background: linear-gradient(45deg, #00C9FF, #92FE9D); color: #0a0c10; font-size: 11px; padding: 6px 12px; margin-top: 5px; }
 
         #mapTopBar { position: absolute; top: env(safe-area-inset-top); left: 0; width: 100%; background: rgba(10, 12, 16, 0.95); padding: 15px; display: flex; justify-content: space-around; align-items: center; z-index: 25; box-sizing: border-box; border-bottom: 1px solid rgba(0, 243, 255, 0.2); box-shadow: 0 5px 15px rgba(0,0,0,0.5);}
         #scrollableMap { width: 100%; height: 100%; overflow-y: auto; overflow-x: hidden; padding-top: calc(90px + env(safe-area-inset-top)); padding-bottom: calc(90px + env(safe-area-inset-bottom)); box-sizing: border-box; scroll-behavior: smooth; position: relative;}
         #scrollableMap::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 4px; height: 100%; background: linear-gradient(180deg, rgba(0,243,255,0.6) 0%, rgba(255,255,255,0.05) 100%); z-index: -1;}
-
         .map-row { width: 100%; height: 80px; display: flex; justify-content: center; align-items: center; position: relative; }
         .map-node { font-family: 'Orbitron', sans-serif; width: 50px; height: 50px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.15); background: #161b22; color: #5a637a; font-size: 18px; font-weight: 700; display: flex; justify-content: center; align-items: center; transition: 0.3s; cursor: pointer; -webkit-tap-highlight-color: transparent;}
         .map-node.completed { background: rgba(0, 243, 255, 0.1); color: #00f3ff; border-color: #00f3ff; box-shadow: 0 0 10px rgba(0,243,255,0.2);}
@@ -122,24 +96,7 @@
         .leaderboard-item:nth-child(2) { color: #C0C0C0; font-size: 16px;}
         .leaderboard-item:nth-child(3) { color: #CD7F32; font-size: 15px;}
 
-        #dailyRewardPopup {
-            position: absolute;
-            top: env(safe-area-inset-top, 20px);
-            left: 50%;
-            transform: translate(-50%, -150px);
-            background: linear-gradient(45deg, #FFD166, #ff9800);
-            color: #0a0c10;
-            padding: 15px 30px;
-            border-radius: 30px;
-            font-weight: bold;
-            font-family: 'Orbitron', sans-serif;
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 100;
-            box-shadow: 0 5px 20px rgba(255, 209, 102, 0.6);
-            text-align: center;
-            pointer-events: none;
-        }
-
+        #dailyRewardPopup { position: absolute; top: env(safe-area-inset-top, 20px); left: 50%; transform: translate(-50%, -150px); background: linear-gradient(45deg, #FFD166, #ff9800); color: #0a0c10; padding: 15px 30px; border-radius: 30px; font-weight: bold; font-family: 'Orbitron', sans-serif; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 100; box-shadow: 0 5px 20px rgba(255, 209, 102, 0.6); text-align: center; pointer-events: none; }
         #resumeCountdownScreen { background-color: rgba(10, 12, 16, 0.4); backdrop-filter: none; z-index: 30; }
         #countdownNumber { font-family: 'Orbitron', sans-serif; font-size: 100px; font-weight: 900; color: #00f3ff; text-shadow: 0 0 30px #00f3ff; }
 
@@ -148,15 +105,6 @@
         .confirm-box { background: #0a0c10; border: 1px solid rgba(239, 71, 111, 0.4); border-radius: 16px; padding: 30px; max-width: 300px; text-align: center; }
         .confirm-box h3 { font-family: 'Orbitron', sans-serif; color: #EF476F; margin: 0 0 15px 0; }
         .confirm-box p { color: #c9d1d9; margin-bottom: 20px; font-size: 14px; }
-
-        #userInfo { 
-            position: absolute; top: calc(15px + env(safe-area-inset-top)); right: 15px; 
-            display: none; align-items: center; gap: 8px; z-index: 15; pointer-events: auto;
-            background: rgba(10, 12, 16, 0.8); padding: 5px 10px; border-radius: 20px;
-            border: 1px solid rgba(0, 243, 255, 0.3);
-        }
-        #userInfo img { width: 24px; height: 24px; border-radius: 50%; }
-        #userInfo span { font-size: 12px; color: #00f3ff; font-family: 'Orbitron', sans-serif; }
     </style>
 </head>
 <body>
@@ -172,11 +120,6 @@
         </div>
     </div>
 
-    <div id="userInfo">
-        <img id="userAvatar" src="" alt="">
-        <span id="userName">Guest</span>
-    </div>
-
     <div id="welcomeScreen" class="screen active">
         <div class="cyber-grid"></div>
         <h2 style="color: #00f3ff;">System Override</h2>
@@ -185,7 +128,6 @@
         <div style="margin-top: 20px;">
             <button class="action-btn" id="enterMapBtn">▶ Play Campaign</button>
             <button class="action-btn survival" id="survivalModeBtn">⚡ Survival Mode</button>
-
             <button class="action-btn" id="freeDailyCoinsBtn" style="background: linear-gradient(45deg, #FFD166, #f39c12); color: #0a0c10; margin-top: 8px;">📺 Free 100 💰 (Daily)</button>
 
             <div style="display:flex; gap:5px; justify-content:center; margin-top: 15px; flex-wrap: wrap; padding: 0 20px;">
@@ -193,8 +135,6 @@
                 <button class="action-btn secondary" id="openQuestsBtn" style="width: auto; padding: 10px; color: #92FE9D; border-color: #92FE9D;">📜 Quests</button>
                 <button class="action-btn secondary" id="openSettingsBtn" style="width: auto; padding: 10px;">⚙️ Settings</button>
             </div>
-            
-            <button class="action-btn invite" id="inviteFriendBtn" style="display:none; width: auto; padding: 8px 15px; margin-top: 10px;">🎮 Invite Friend</button>
         </div>
     </div>
 
@@ -228,8 +168,6 @@
     <div id="leaderboardScreen" class="screen">
         <h2 style="color: #FFD166;">HIGH SCORES</h2>
         <div class="box" id="leaderboardList" style="width: 300px; max-height: 50vh; overflow-y: auto; padding: 10px;"></div>
-        <div style="color: #8b949e; font-size: 11px; margin-bottom: 15px; padding: 0 20px;">Local scores on this device</div>
-        <button class="action-btn" id="globalLbBtn" style="background: linear-gradient(45deg, #4285F4, #34A853); color: white; margin-bottom: 8px;">🌍 Global Leaderboard</button>
         <button class="action-btn secondary" id="lbToMenuBtn">Main Menu</button>
     </div>
 
@@ -241,7 +179,6 @@
         </div>
         <div id="progressContainer"><div id="progressBar"></div></div>
         <div id="comboDisplay">COMBO x2</div>
-
         <div id="targetDisplay"></div>
         <div id="powerupBar">
             <button class="power-btn" id="btnSlowMo">Slow-Mo <span id="slowMoCount">0</span></button>
@@ -311,20 +248,17 @@
 
     <script>
         // =========================================================
-        // ADMOB NATIVE BRIDGE & TEST SIMÜLASYONU
+        // NATIVE ADMOB (Kesin Eklenti Kontrolü)
         // =========================================================
         const ADMOB_CONFIG = window.GAME_CONFIG.admob;
-        const PLAY_GAMES_CONFIG = window.GAME_CONFIG.playGames;
 
         let admobReady = false;
         let interstitialLoaded = false;
         let rewardedLoaded = false;
-        
-        // YENİ: Tarayıcıda test edebilmen için Simülasyon Modu eklendi
-        let isMockAdMode = false; 
+        let myAdMobPlugin = null;
 
         let lastAdTimestamp = 0;
-        const AD_COOLDOWN_MS = 60000; // Kullanıcıyı yormamak için 1 dakika bekleme süresi
+        const AD_COOLDOWN_MS = 60000; 
 
         function canShowAd() {
             return (Date.now() - lastAdTimestamp) >= AD_COOLDOWN_MS;
@@ -333,161 +267,179 @@
             lastAdTimestamp = Date.now();
         }
 
-        let _adMobInitTriggered = false;
-        function triggerAdMobInit() {
-            if (_adMobInitTriggered) return;
-            _adMobInitTriggered = true;
-            initAdMob();
-        }
-        document.addEventListener('deviceready', triggerAdMobInit, false);
-        if (document.readyState === 'complete' || document.readyState === 'interactive') {
-            setTimeout(triggerAdMobInit, 500);
-        } else {
-            document.addEventListener('DOMContentLoaded', () => setTimeout(triggerAdMobInit, 500));
-        }
-
-        setTimeout(() => {
-            if (!admobReady && !isMockAdMode) {
-                console.log("[AdMob] Eklenti bulunamadı. Test (Simülasyon) moduna geçiliyor.");
-                isMockAdMode = true; // Tarayıcıdaysan test modunu aktifleştir
-                admobReady = true;
-                interstitialLoaded = true;
-                rewardedLoaded = true;
-            }
-        }, 3000);
+        document.addEventListener('deviceready', initAdMob, false);
+        // Capacitor veya web wrapper için alternatif tetikleyici
+        setTimeout(initAdMob, 1000); 
 
         async function initAdMob() {
             if (admobReady) return; 
+
+            // 1. Capacitor Eklentisini Kontrol Et
+            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AdMob) {
+                myAdMobPlugin = window.Capacitor.Plugins.AdMob;
+            } 
+            // 2. Cordova Eklentisini Kontrol Et (admob-plus-cordova)
+            else if (window.admob) {
+                myAdMobPlugin = window.admob;
+            }
+
+            if (!myAdMobPlugin) {
+                console.warn("[AdMob] EKLENTİ BULUNAMADI! APK içine AdMob plugin eklenmemiş.");
+                // Geliştirici görsün diye uyarı veriyoruz
+                // alert("Geliştirici Uyarısı: AdMob eklentisi (plugin) projede bulunamadı. Lütfen kurulum adımlarını kontrol et.");
+                return;
+            }
+
             try {
-                const Capacitor = window.Capacitor;
-                if (!Capacitor || !Capacitor.isNativePlatform || !Capacitor.isNativePlatform()) {
-                    console.log("[AdMob] Native platform değil, Simülasyon moduna geçilecek.");
-                    return; // Üstteki setTimeout mock modu devreye sokacak
+                // Initialize Capacitor Admob
+                if (myAdMobPlugin.initialize) {
+                    await myAdMobPlugin.initialize({ requestTrackingAuthorization: false, testingDevices: [], initializeForTesting: false });
+                } 
+                // Initialize Cordova Admob
+                else if (myAdMobPlugin.start) {
+                    await myAdMobPlugin.start();
                 }
 
-                const AdMob = Capacitor.Plugins.AdMob;
-                if (!AdMob) {
-                    console.log("[AdMob] AdMob eklentisi bulunamadı.");
-                    return;
-                }
+                setupAdListeners();
+                admobReady = true;
+                window.ADMOB_READY = true;
+                
+                // Arka planda reklamları hazırla
+                prepareAds();
+                
+            } catch (e) {
+                console.error("[AdMob] Başlatma Hatası:", e.message);
+            }
+        }
 
-                await AdMob.initialize({ requestTrackingAuthorization: false, testingDevices: [], initializeForTesting: false });
-                window.AdMobPlugin = AdMob;
-
-                AdMob.addListener('interstitialAdLoaded', () => { interstitialLoaded = true; });
-                AdMob.addListener('interstitialAdFailedToLoad', (err) => { interstitialLoaded = false; });
-                AdMob.addListener('interstitialAdDismissed', () => {
+        function setupAdListeners() {
+            if (window.Capacitor) {
+                myAdMobPlugin.addListener('interstitialAdLoaded', () => { interstitialLoaded = true; });
+                myAdMobPlugin.addListener('interstitialAdFailedToLoad', () => { interstitialLoaded = false; });
+                myAdMobPlugin.addListener('interstitialAdDismissed', () => {
                     interstitialLoaded = false;
                     muteGameAudio(false);
-                    AdMob.prepareInterstitial({ adId: ADMOB_CONFIG.interstitialId }).catch(e => console.error(e));
+                    prepareAds();
                     if (window._pendingInterstitialCb) {
                         const cb = window._pendingInterstitialCb; window._pendingInterstitialCb = null; markAdShown(); cb(true);
                     }
                 });
 
-                AdMob.addListener('rewardedVideoAdLoaded', () => { rewardedLoaded = true; });
-                AdMob.addListener('rewardedVideoAdFailedToLoad', (err) => { rewardedLoaded = false; });
-                AdMob.addListener('rewardedVideoAdReward', (reward) => { window._rewardEarned = true; });
-                AdMob.addListener('rewardedVideoAdDismissed', () => {
+                myAdMobPlugin.addListener('rewardedVideoAdLoaded', () => { rewardedLoaded = true; });
+                myAdMobPlugin.addListener('rewardedVideoAdFailedToLoad', () => { rewardedLoaded = false; });
+                myAdMobPlugin.addListener('rewardedVideoAdReward', () => { window._rewardEarned = true; });
+                myAdMobPlugin.addListener('rewardedVideoAdDismissed', () => {
                     rewardedLoaded = false;
                     muteGameAudio(false);
-                    AdMob.prepareRewardVideoAd({ adId: ADMOB_CONFIG.rewardedId }).catch(e => console.error(e));
+                    prepareAds();
                     if (window._rewardEarned && window._pendingRewardCb) {
                         const cb = window._pendingRewardCb; window._pendingRewardCb = null; window._pendingRewardFailCb = null; window._rewardEarned = false; cb();
                     } else if (window._pendingRewardFailCb) {
                         const cb = window._pendingRewardFailCb; window._pendingRewardCb = null; window._pendingRewardFailCb = null; cb();
                     }
                 });
+            } else {
+                // Cordova Events
+                document.addEventListener('admob.interstitial.load', () => { interstitialLoaded = true; });
+                document.addEventListener('admob.interstitial.load_fail', () => { interstitialLoaded = false; });
+                document.addEventListener('admob.interstitial.dismiss', () => {
+                    interstitialLoaded = false; muteGameAudio(false); prepareAds();
+                    if (window._pendingInterstitialCb) { const cb = window._pendingInterstitialCb; window._pendingInterstitialCb = null; markAdShown(); cb(true); }
+                });
 
-                admobReady = true;
-                window.ADMOB_READY = true;
-                
-                await AdMob.prepareInterstitial({ adId: ADMOB_CONFIG.interstitialId }).catch(e=>{});
-                await AdMob.prepareRewardVideoAd({ adId: ADMOB_CONFIG.rewardedId }).catch(e=>{});
-                
-            } catch (e) {
-                console.error("[AdMob] Init error:", e.message);
+                document.addEventListener('admob.rewarded.load', () => { rewardedLoaded = true; });
+                document.addEventListener('admob.rewarded.load_fail', () => { rewardedLoaded = false; });
+                document.addEventListener('admob.rewarded.reward', () => { window._rewardEarned = true; });
+                document.addEventListener('admob.rewarded.dismiss', () => {
+                    rewardedLoaded = false; muteGameAudio(false); prepareAds();
+                    if (window._rewardEarned && window._pendingRewardCb) {
+                        const cb = window._pendingRewardCb; window._pendingRewardCb = null; window._pendingRewardFailCb = null; window._rewardEarned = false; cb();
+                    } else if (window._pendingRewardFailCb) {
+                        const cb = window._pendingRewardFailCb; window._pendingRewardCb = null; window._pendingRewardFailCb = null; cb();
+                    }
+                });
             }
         }
 
-        // DÜZELTME: Tarayıcıda da çalışması için Mock desteği eklendi
-        async function crazyMidgameAd(callback) {
-            if (!canShowAd()) {
-                if (callback) callback(false);
-                return;
-            }
-            
-            if (isMockAdMode) {
-                // Test Modu Geçiş Reklamı
-                showNotification("Simulating Interstitial Ad...", "#00f3ff", "#00C9FF");
-                setTimeout(() => {
-                    markAdShown();
-                    if (callback) callback(true);
-                }, 1500);
-                return;
-            }
+        async function prepareAds() {
+            try {
+                if (window.Capacitor) {
+                    await myAdMobPlugin.prepareInterstitial({ adId: ADMOB_CONFIG.interstitialId }).catch(()=>{});
+                    await myAdMobPlugin.prepareRewardVideoAd({ adId: ADMOB_CONFIG.rewardedId }).catch(()=>{});
+                } else if (window.admob) {
+                    const interstitial = new admob.InterstitialAd({ adUnitId: ADMOB_CONFIG.interstitialId });
+                    await interstitial.load(); window._cordovaInterstitial = interstitial;
+                    
+                    const rewarded = new admob.RewardedAd({ adUnitId: ADMOB_CONFIG.rewardedId });
+                    await rewarded.load(); window._cordovaRewarded = rewarded;
+                }
+            } catch(e) {}
+        }
 
-            if (admobReady && interstitialLoaded && window.AdMobPlugin) {
-                try {
+        async function crazyMidgameAd(callback) {
+            if (!canShowAd()) { if (callback) callback(false); return; }
+            if (!admobReady || !myAdMobPlugin) { if (callback) callback(false); return; }
+
+            try {
+                if (window.Capacitor) {
+                    if (!interstitialLoaded) {
+                        await myAdMobPlugin.prepareInterstitial({ adId: ADMOB_CONFIG.interstitialId });
+                    }
                     muteGameAudio(true);
                     window._pendingInterstitialCb = callback;
-                    await window.AdMobPlugin.showInterstitial();
-                } catch (e) {
-                    muteGameAudio(false); window._pendingInterstitialCb = null; if (callback) callback(false);
+                    await myAdMobPlugin.showInterstitial();
+                } else if (window.admob && window._cordovaInterstitial) {
+                    muteGameAudio(true);
+                    window._pendingInterstitialCb = callback;
+                    await window._cordovaInterstitial.show();
                 }
-            } else {
-                if (callback) callback(false);
+            } catch (e) {
+                muteGameAudio(false); window._pendingInterstitialCb = null; if (callback) callback(false);
             }
         }
 
-        // DÜZELTME: Ödüllü reklamlar (Revive, Market vb.) artık bilgisayarda test edilebilir!
         async function crazyRewardedAd(onSuccess, onFail) {
-            if (isMockAdMode) {
-                // Test Modu Ödüllü Reklam
-                showNotification("Simulating Rewarded Ad...", "#FFD166", "#f39c12");
-                setTimeout(() => {
-                    if (onSuccess) onSuccess();
-                }, 2000);
-                return;
+            if (!admobReady || !myAdMobPlugin) { 
+                showNotification("Reklam Eklentisi Bulunamadı!", "#EF476F", "#ff0055");
+                if (onFail) onFail(); 
+                return; 
             }
 
-            if (admobReady && rewardedLoaded && window.AdMobPlugin) {
-                try {
+            try {
+                if (window.Capacitor) {
+                    if (!rewardedLoaded) {
+                        showNotification("Reklam Yükleniyor...", "#00f3ff", "#00C9FF");
+                        await myAdMobPlugin.prepareRewardVideoAd({ adId: ADMOB_CONFIG.rewardedId });
+                    }
                     muteGameAudio(true);
                     window._rewardEarned = false;
                     window._pendingRewardCb = onSuccess;
                     window._pendingRewardFailCb = onFail;
-                    await window.AdMobPlugin.showRewardVideoAd();
-                } catch (e) {
-                    muteGameAudio(false); window._pendingRewardCb = null; window._pendingRewardFailCb = null; if (onFail) onFail();
+                    await myAdMobPlugin.showRewardVideoAd();
+                } else if (window.admob && window._cordovaRewarded) {
+                    muteGameAudio(true);
+                    window._rewardEarned = false;
+                    window._pendingRewardCb = onSuccess;
+                    window._pendingRewardFailCb = onFail;
+                    await window._cordovaRewarded.show();
                 }
-            } else {
+            } catch (e) {
+                console.error("Ad error:", e);
+                muteGameAudio(false); window._pendingRewardCb = null; window._pendingRewardFailCb = null; 
+                showNotification("Reklam Yüklenemedi.", "#EF476F", "#ff0055");
                 if (onFail) onFail();
             }
         }
 
-        function crazyGameplayStart() {} function crazyGameplayStop() {} function crazyHappytime() {} function crazySadtime() {}
-        async function initCloudSave() {} async function saveDataToCloud() {} async function loadDataFromCloud() { return null; } function queueCloudSave() {}
-        async function crazyInviteFriend() {
-            if (navigator.share) {
-                try { await navigator.share({ title: 'Neon Core', text: 'Check out Neon Core!', url: 'https://play.google.com/store/apps/details?id=com.yourcompany.neoncore' }); } catch(e) {}
-            } else { showNotification("Share not supported", "#EF476F", "#ff0055"); }
-        }
-        function displayUserInfo() {} function hideUserInfo() {}
         function muteGameAudio(mute) {
             if (typeof audioCtx !== 'undefined' && audioCtx) {
                 try { if (mute) audioCtx.suspend(); else audioCtx.resume(); } catch(e) {}
             }
         }
 
-        // Play Games Stubs
-        let playGamesReady = false; let playGamesSignedIn = false;
-        async function initPlayGames() {} async function submitGlobalScore(score) {} async function showGlobalLeaderboard() {}
-
         // =========================================================
-        // GAME CODE
+        // OYUN KODU
         // =========================================================
-
         const canvas = document.getElementById('gameCanvas'); const ctx = canvas.getContext('2d');
         const screens = {
             welcome: document.getElementById('welcomeScreen'), map: document.getElementById('mapScreen'),
@@ -563,16 +515,6 @@
             setTimeout(() => { popup.style.transform = 'translate(-50%, -150px)'; }, 3500);
         }
 
-        function addToLocalLeaderboard(score) {
-            let name = savedData.nickname || "Player"; savedData.localLeaderboard.push({ name: name, score: score, date: new Date().toDateString() }); savedData.localLeaderboard.sort((a, b) => b.score - a.score); savedData.localLeaderboard = savedData.localLeaderboard.slice(0, 10); saveData();
-        }
-
-        function loadLocalLeaderboard() {
-            let container = document.getElementById('leaderboardList');
-            if (!savedData.localLeaderboard || savedData.localLeaderboard.length === 0) { container.innerHTML = '<div style="color: #8b949e; padding: 20px;">No scores yet.<br>Play Survival Mode!</div>'; return; }
-            let html = ""; savedData.localLeaderboard.forEach((entry, idx) => { html += `<div class="leaderboard-item"><span>${idx+1}. ${entry.name.substring(0,12)}</span><span>${entry.score}</span></div>`; }); container.innerHTML = html;
-        }
-
         window.updateQuest = function(id, amount) {
             if(!savedData.quests || !savedData.quests.list) return;
             let q = savedData.quests.list.find(x => x.id === id);
@@ -635,7 +577,7 @@
             btn.style.pointerEvents = "none"; btn.innerText = "Loading Ad...";
             crazyRewardedAd(() => {
                 savedData.freeDailyAds.used++; savedData.coins += DAILY_FREE_REWARD; saveData(); playSound('win'); showNotification(`+${DAILY_FREE_REWARD} 💰 EARNED!`, "#FFD166", "#f39c12"); updateFreeDailyBtn();
-            }, () => { btn.style.pointerEvents = "auto"; updateFreeDailyBtn(); showNotification("Ad not available", "#EF476F", "#ff0055"); });
+            }, () => { btn.style.pointerEvents = "auto"; updateFreeDailyBtn(); });
         };
 
         document.getElementById('doubleCoinsBtn').onclick = () => {
@@ -644,13 +586,15 @@
             crazyRewardedAd(() => {
                 window.doubleCoinsClaimed = true; const bonus = window.lastLevelReward || 0; savedData.coins += bonus; saveData(); playSound('win');
                 document.getElementById('rewardCoins').innerText = "+" + (bonus * 2) + " 💰 (2x!)"; btn.style.opacity = "0.4"; btn.innerText = "✓ Doubled!"; showNotification("REWARD DOUBLED! +" + bonus + " 💰", "#92FE9D", "#00C9FF"); updateGameUI();
-            }, () => { btn.style.pointerEvents = "auto"; btn.innerText = "Watch Ad → 2x Coins 📺"; showNotification("Ad not available", "#EF476F", "#ff0055"); });
+            }, () => { btn.style.pointerEvents = "auto"; btn.innerText = "Watch Ad → 2x Coins 📺"; });
         };
 
         let playingLevel = 1; const CLASSIC_PALETTE = ['#00f3ff', '#EF476F', '#FFD166', '#aa00ff', '#00ff88']; let currentPalette = CLASSIC_PALETTE;
         let isSurvivalMode = false; let survivalLastScore = 0; let isOverdrive = false; let currentDynamicSpeed = 1.0; let sessionReviveCount = 0; let comboTimeout = null; let levelSpawnCount = 0; let hasUsedAdRevive = false; let laserCharges = 0;
+        
         let levelCompleteCount = 0; 
-        let survivalDeathCount = 0; // YENİ: Survival modunda reklamları kontrol etmek için
+        let survivalDeathCount = 0; 
+        let campaignDeathCount = 0; 
 
         window.watchAdForShop = function(itemId, type, requiredAds) {
             initAudio();
@@ -661,7 +605,7 @@
                     delete savedData.adProgress[itemId]; playSound('win');
                 } else { playSound('hit'); }
                 saveData(); generateShop();
-            }, () => { showNotification("Ad not available", "#EF476F", "#ff0055"); });
+            }, () => {});
         };
 
         function generateMap() {
@@ -701,7 +645,7 @@
 
         const BASE_RADIUS = 15; const RING_START_GAP = 20; const RING_THICKNESS = 6; const RING_SPACING = 16;
         let rings = []; let levelParamsCache = {}; let score = 0, totalTargetHp = 0, collectedHp = 0; let combo = 0, comboMultiplier = 1.0; let lastSpawnedColor = null; let consecutiveColorCount = 0; let bossMechanicTimer = 0;
-        let gameState = 'menu'; let isSlowMoActive = false, slowMoTimer = 0, isShieldActive = false; let balls = [], particles = [], ripples = [], floatingTexts = [], frameCount = 0; let screenShake = 0; let animationId = null; let gameplayActuallyStarted = false;
+        let gameState = 'menu'; let isSlowMoActive = false, slowMoTimer = 0, isShieldActive = false; let balls = [], particles = [], ripples = [], floatingTexts = [], frameCount = 0; let screenShake = 0; let animationId = null;
 
         function calculateLevelParams(lvl) {
             let isBoss = lvl % 5 === 0 && !isSurvivalMode; let ringCount = 2; let calcSpeed = 1.0; let calcSpawn = 80;
@@ -744,48 +688,50 @@
 
         function startGame() {
             initAudio(); if(animationId) cancelAnimationFrame(animationId); gameState = 'playing'; showScreen(''); screens.gameUI.style.display = 'block'; resize(); initLevel(); if(levelParamsCache.isBoss) playSound('boss');
-            if (!gameplayActuallyStarted) { crazyGameplayStart(); gameplayActuallyStarted = true; }
             gameLoop();
         }
 
-        function pauseGame() { initAudio(); if(gameState !== 'playing') return; gameState = 'paused'; if (gameplayActuallyStarted) { crazyGameplayStop(); gameplayActuallyStarted = false; } showScreen('pause'); }
+        function pauseGame() { initAudio(); if(gameState !== 'playing') return; gameState = 'paused'; showScreen('pause'); }
 
         function resumeGame() {
             initAudio(); if (gameState === 'playing') return; showScreen(''); screens.gameUI.style.display = 'block'; const cdScreen = document.getElementById('resumeCountdownScreen'); const cdNumber = document.getElementById('countdownNumber'); cdScreen.classList.add('active'); let count = 3; cdNumber.innerText = count;
-            let interval = setInterval(() => { count--; if (count > 0) { cdNumber.innerText = count; playSound('hit'); } else { clearInterval(interval); cdScreen.classList.remove('active'); gameState = 'playing'; if (!gameplayActuallyStarted) { crazyGameplayStart(); gameplayActuallyStarted = true; } if(animationId) cancelAnimationFrame(animationId); gameLoop(); } }, 1000);
+            let interval = setInterval(() => { count--; if (count > 0) { cdNumber.innerText = count; playSound('hit'); } else { clearInterval(interval); cdScreen.classList.remove('active'); gameState = 'playing'; if(animationId) cancelAnimationFrame(animationId); gameLoop(); } }, 1000);
         }
 
         function quickRestart() { initAudio(); if(isSurvivalMode) { checkSurvivalAndStart(); } else { checkUnlocksAndStart(playingLevel); } }
 
         function levelComplete() {
-            if(isSurvivalMode) return; playSound('win'); gameState = 'menu'; if(animationId) { cancelAnimationFrame(animationId); animationId = null; } if (gameplayActuallyStarted) { crazyGameplayStop(); gameplayActuallyStarted = false; }
+            if(isSurvivalMode) return; playSound('win'); gameState = 'menu'; if(animationId) { cancelAnimationFrame(animationId); animationId = null; } 
             let baseReward = 10 + (playingLevel * 2); let upgradeMult = 1.0 + (savedData.upgrades.coinMultiplier * 0.10); let finalReward = Math.floor(baseReward * comboMultiplier * upgradeMult); savedData.coins += finalReward;
             if(playingLevel === savedData.maxLevelUnlocked) { savedData.maxLevelUnlocked++; } playingLevel++; saveData();
             document.getElementById('rewardCoins').innerText = "+" + finalReward + " 💰"; document.getElementById('comboBonusText').innerText = (comboMultiplier > 1.0 || upgradeMult > 1.0) ? `Bonus Active!` : "";
             window.lastLevelReward = finalReward; window.doubleCoinsClaimed = false; const dblBtn = document.getElementById('doubleCoinsBtn'); if (dblBtn) { dblBtn.style.opacity = "1"; dblBtn.style.pointerEvents = "auto"; dblBtn.innerText = "Watch Ad → 2x Coins 📺"; }
             showScreen('complete');
 
-            // DÜZELTME: Level (Campaign) Modunda her 3 seviyede bir geçiş reklamı gösterilir
             levelCompleteCount++;
             if (levelCompleteCount % 3 === 0) {
-                setTimeout(() => { crazyMidgameAd(); }, 1500); // Oyuncu ödülünü görsün diye hafif gecikme
+                setTimeout(() => { crazyMidgameAd(); }, 1500); 
             }
         }
 
         function gameOver() {
-            playSound('error'); gameState = 'menu'; if(animationId) { cancelAnimationFrame(animationId); animationId = null; } if (gameplayActuallyStarted) { crazyGameplayStop(); gameplayActuallyStarted = false; }
+            playSound('error'); gameState = 'menu'; if(animationId) { cancelAnimationFrame(animationId); animationId = null; } 
 
             if(isSurvivalMode) {
                 if(collectedHp > savedData.highScoreSurvival) { savedData.highScoreSurvival = collectedHp; saveData(); } if (collectedHp > 0) { addToLocalLeaderboard(collectedHp); }
                 document.getElementById('failStats').innerHTML = `<div style="color: #8b949e; margin-bottom:10px;">Mode: <strong style="color: #aa00ff;">Survival</strong></div><div style="color: #8b949e;">Your Score: <strong style="color: #00f3ff; font-size: 24px;">${collectedHp}</strong></div><div style="color: #8b949e; font-size: 12px; margin-top:5px;">Best: ${savedData.highScoreSurvival}</div>`;
                 
-                // YENİ: Survival modunda öldüğünde her 3 ölümde bir geçiş reklamı (Interstitial)
                 survivalDeathCount++;
                 if(survivalDeathCount % 3 === 0) {
                      setTimeout(() => crazyMidgameAd(), 1000);
                 }
             } else {
                 document.getElementById('failStats').innerHTML = `<div style="color: #8b949e;">Core Leaked: <strong style="color: #EF476F; font-size: 22px;">${totalTargetHp - collectedHp}</strong></div>`;
+                
+                campaignDeathCount++;
+                if (campaignDeathCount % 3 === 0) {
+                    setTimeout(() => crazyMidgameAd(), 1000);
+                }
             }
 
             showScreen('gameOver');
@@ -800,7 +746,7 @@
             if(isFree || savedData.coins >= currentReviveCost) {
                 if(!isFree) savedData.coins -= currentReviveCost; sessionReviveCount++; saveData();
                 balls = []; frameCount = -30; combo = 0; updateComboUI(); showScreen(''); screens.gameUI.style.display = 'block'; gameState = 'playing';
-                if (!gameplayActuallyStarted) { crazyGameplayStart(); gameplayActuallyStarted = true; } if(animationId) cancelAnimationFrame(animationId); gameLoop(); updateGameUI();
+                if(animationId) cancelAnimationFrame(animationId); gameLoop(); updateGameUI();
             }
         }
 
@@ -835,7 +781,7 @@
         document.getElementById('quickRestartBtn').onclick = quickRestart; document.getElementById('reviveBtn').onclick = () => revive(false); document.getElementById('failHubBtn').onclick = () => { initAudio(); openMapSmoothly(); }; document.getElementById('failToMenuBtn').onclick = () => { initAudio(); showScreen('welcome'); };
         
         document.getElementById('reviveAdBtn').onclick = () => {
-            crazyRewardedAd(() => { revive(true); }, () => { showNotification("Ad not available", "#EF476F", "#ff0055"); });
+            crazyRewardedAd(() => { revive(true); }, () => {  });
         };
 
         document.getElementById('btnSlowMo').onclick = (e) => { e.preventDefault(); e.stopPropagation(); initAudio(); if(savedData.inventory.slowMo > 0 && !isSlowMoActive) { savedData.inventory.slowMo--; saveData(); isSlowMoActive = true; slowMoTimer = 360; playSound('boss'); updateGameUI(); updateQuest('powerup', 1); } else if(savedData.inventory.slowMo <= 0) { playSound('error'); } };
@@ -966,2064 +912,6 @@
             for(let i=ripples.length-1; i>=0; i--) { let r = ripples[i]; r.radius += 4; r.life -= 0.05; if(r.life <= 0) { ripples.splice(i,1); continue; } ctx.beginPath(); ctx.arc(r.x, r.y, r.radius, 0, Math.PI*2); ctx.strokeStyle = r.color; ctx.globalAlpha = r.life; ctx.lineWidth = 2; ctx.stroke(); ctx.globalAlpha = 1.0; }
             for (let i = particles.length - 1; i >= 0; i--) { let p = particles[i]; p.x += p.vx; p.y += p.vy; p.life -= 0.04; if(p.life <= 0) { particles.splice(i, 1); continue; } ctx.globalAlpha = p.life; if (p.isLine) { ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - p.vx*2, p.y - p.vy*2); ctx.strokeStyle = p.color; ctx.lineWidth = p.size; ctx.stroke(); } else { ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fillStyle = p.color; ctx.fill(); } ctx.globalAlpha = 1.0; }
             for (let i = floatingTexts.length - 1; i >= 0; i--) { let ft = floatingTexts[i]; ft.y += ft.vy; ft.life -= 0.02; if (ft.life <= 0) { floatingTexts.splice(i, 1); continue; } ctx.globalAlpha = Math.max(0, ft.life); ctx.font = "bold 20px 'Orbitron', sans-serif"; ctx.fillStyle = ft.color; ctx.textAlign = "center"; ctx.shadowBlur = 10; ctx.shadowColor = ft.color; let scale = 1 + (1 - ft.life) * 0.5; ctx.save(); ctx.translate(ft.x, ft.y); ctx.scale(scale, scale); ctx.fillText(ft.text, 0, 0); ctx.restore(); ctx.globalAlpha = 1.0; ctx.shadowBlur = 0; }
-            ctx.restore(); animationId = requestAnimationFrame(gameLoop);
-        }
-    </script>
-</body>
-</html>
-        .power-btn { display: flex; background: rgba(10, 12, 16, 0.9); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; color: white; padding: 8px 15px; font-size: 13px; font-weight: bold; cursor: pointer; align-items: center; gap: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); font-family: 'Orbitron', sans-serif; transition: 0.2s;}
-        .power-btn.has-charges { animation: pulseBtn 2s infinite; }
-        .power-btn:active { transform: scale(0.9); }
-        .power-btn span { color: #fff; font-size: 12px; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px;}
-        #btnSlowMo { border-color: rgba(0, 243, 255, 0.4); }
-        #btnShield { border-color: rgba(255, 234, 0, 0.4); }
-        #btnEmp { border-color: rgba(239, 71, 111, 0.4); }
-
-        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; justify-content: center; align-items: center; background-color: rgba(10, 12, 16, 0.98); z-index: 20; text-align: center; backdrop-filter: blur(8px); padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); box-sizing: border-box;}
-        .screen.active { display: flex; }
-
-        #welcomeScreen { background: linear-gradient(180deg, rgba(0, 243, 255, 0.05) 0%, rgba(10, 12, 16, 1) 100%); }
-        .cyber-grid {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-            background-image:
-                linear-gradient(rgba(0, 243, 255, 0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 243, 255, 0.1) 1px, transparent 1px);
-            background-size: 40px 40px;
-            animation: moveGrid 15s linear infinite;
-            opacity: 0.5;
-        }
-        @keyframes moveGrid { from { background-position: 0 0; } to { background-position: 40px 40px; } }
-
-        h1 { font-family: 'Orbitron', sans-serif; font-size: 42px; margin: 0 0 10px 0; color: #fff; text-transform: uppercase; letter-spacing: 3px; text-shadow: 0 0 20px rgba(0, 243, 255, 0.8); animation: pulseGlow 2s infinite alternate;}
-        @keyframes pulseGlow { 0% { text-shadow: 0 0 15px rgba(0, 243, 255, 0.6); } 100% { text-shadow: 0 0 30px rgba(0, 243, 255, 1); } }
-        h2 { font-size: 18px; margin: 0 0 15px 0; color: #8b949e; letter-spacing: 2px; text-transform: uppercase;}
-
-        .box { background: rgba(255,255,255,0.03); border: 1px solid rgba(0, 243, 255, 0.2); padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 25px; width: 260px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); backdrop-filter: blur(10px);}
-        .coin-text { color: #ffea00; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 24px; text-shadow: 0 0 15px rgba(255,234,0,0.4); margin: 10px 0;}
-
-        button.action-btn { font-family: 'Orbitron', sans-serif; padding: 15px 25px; font-size: 15px; font-weight: 700; color: #0a0c10; background: linear-gradient(45deg, #ffffff, #00f3ff); border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 5px 20px rgba(0, 243, 255, 0.4); margin: 8px; width: 240px; text-transform: uppercase; letter-spacing: 1px; outline: none; -webkit-tap-highlight-color: transparent; transition: 0.2s;}
-        button.action-btn:active { transform: scale(0.95); box-shadow: 0 2px 10px rgba(0, 243, 255, 0.4); }
-        button.action-btn.secondary { background: rgba(255,255,255,0.05); color: #c9d1d9; box-shadow: none; border: 1px solid rgba(255,255,255,0.15); }
-        button.action-btn.secondary:active { background: rgba(255,255,255,0.1); border-color: #00f3ff; color: #00f3ff;}
-        button.action-btn.survival { background: linear-gradient(45deg, #aa00ff, #EF476F); color: white; box-shadow: 0 5px 20px rgba(239, 71, 111, 0.5); }
-
-        button.action-btn.buy { background: linear-gradient(45deg, #ffea00, #f39c12); font-size: 12px; width: 100%; margin: 3px 0; padding: 8px; border-radius: 20px; }
-        button.action-btn.ad { background: linear-gradient(45deg, #00C9FF, #92FE9D); color: #0a0c10; font-size: 11px; width: 100%; margin: 3px 0; padding: 6px; border-radius: 20px; }
-
-        button.action-btn.revive { background: linear-gradient(45deg, #EF476F, #ff0055); color: white; margin-bottom: 10px;}
-        button.action-btn.invite { background: linear-gradient(45deg, #00C9FF, #92FE9D); color: #0a0c10; font-size: 11px; padding: 6px 12px; margin-top: 5px; }
-
-        #mapTopBar { position: absolute; top: env(safe-area-inset-top); left: 0; width: 100%; background: rgba(10, 12, 16, 0.95); padding: 15px; display: flex; justify-content: space-around; align-items: center; z-index: 25; box-sizing: border-box; border-bottom: 1px solid rgba(0, 243, 255, 0.2); box-shadow: 0 5px 15px rgba(0,0,0,0.5);}
-        #scrollableMap { width: 100%; height: 100%; overflow-y: auto; overflow-x: hidden; padding-top: calc(90px + env(safe-area-inset-top)); padding-bottom: calc(90px + env(safe-area-inset-bottom)); box-sizing: border-box; scroll-behavior: smooth; position: relative;}
-        #scrollableMap::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 4px; height: 100%; background: linear-gradient(180deg, rgba(0,243,255,0.6) 0%, rgba(255,255,255,0.05) 100%); z-index: -1;}
-
-        .map-row { width: 100%; height: 80px; display: flex; justify-content: center; align-items: center; position: relative; }
-        .map-node { font-family: 'Orbitron', sans-serif; width: 50px; height: 50px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.15); background: #161b22; color: #5a637a; font-size: 18px; font-weight: 700; display: flex; justify-content: center; align-items: center; transition: 0.3s; cursor: pointer; -webkit-tap-highlight-color: transparent;}
-        .map-node.completed { background: rgba(0, 243, 255, 0.1); color: #00f3ff; border-color: #00f3ff; box-shadow: 0 0 10px rgba(0,243,255,0.2);}
-        .map-node.current { background: linear-gradient(135deg, #ffffff, #00f3ff); color: #0a0c10; border-color: #ffffff; box-shadow: 0 0 25px rgba(0,243,255,0.8); transform: scale(1.2); z-index: 5;}
-        .map-node.locked { color: #484f58; border-color: #21262d; cursor: not-allowed; }
-        .map-node.boss { border-color: #EF476F; color: #EF476F; }
-        .map-node.boss.completed { background: rgba(239, 71, 111, 0.1); color: #EF476F; border-color: #EF476F;}
-        .map-node.boss.current { background: linear-gradient(135deg, #EF476F, #ff0055); color: white; border-color: white; box-shadow: 0 0 30px rgba(239, 71, 111, 0.8); transform: scale(1.3); z-index: 5;}
-
-        .shop-item { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 12px; margin-bottom: 10px; width: 100%; box-sizing: border-box; border: 1px solid rgba(255,255,255,0.05); }
-        .shop-item-left { width: 55%; text-align: left; }
-        .shop-item-right { width: 42%; display: flex; flex-direction: column; justify-content: center;}
-        .shop-item strong { display: block; font-size: 14px; color: #fff; margin-bottom: 3px; font-family: 'Orbitron', sans-serif;}
-        .shop-item small { color: #8b949e; font-size: 11px;}
-
-        .leaderboard-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); font-family: 'Orbitron', sans-serif;}
-        .leaderboard-item:nth-child(1) { color: #FFD166; font-size: 18px; font-weight: bold;}
-        .leaderboard-item:nth-child(2) { color: #C0C0C0; font-size: 16px;}
-        .leaderboard-item:nth-child(3) { color: #CD7F32; font-size: 15px;}
-
-        #dailyRewardPopup {
-            position: absolute;
-            top: env(safe-area-inset-top, 20px);
-            left: 50%;
-            transform: translate(-50%, -150px);
-            background: linear-gradient(45deg, #FFD166, #ff9800);
-            color: #0a0c10;
-            padding: 15px 30px;
-            border-radius: 30px;
-            font-weight: bold;
-            font-family: 'Orbitron', sans-serif;
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 100;
-            box-shadow: 0 5px 20px rgba(255, 209, 102, 0.6);
-            text-align: center;
-            pointer-events: none;
-        }
-
-        #resumeCountdownScreen { background-color: rgba(10, 12, 16, 0.4); backdrop-filter: none; z-index: 30; }
-        #countdownNumber { font-family: 'Orbitron', sans-serif; font-size: 100px; font-weight: 900; color: #00f3ff; text-shadow: 0 0 30px #00f3ff; }
-
-        .confirm-dialog { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 999; backdrop-filter: blur(10px); }
-        .confirm-dialog.active { display: flex; }
-        .confirm-box { background: #0a0c10; border: 1px solid rgba(239, 71, 111, 0.4); border-radius: 16px; padding: 30px; max-width: 300px; text-align: center; }
-        .confirm-box h3 { font-family: 'Orbitron', sans-serif; color: #EF476F; margin: 0 0 15px 0; }
-        .confirm-box p { color: #c9d1d9; margin-bottom: 20px; font-size: 14px; }
-
-        /* CrazyGames user info (opsiyonel) */
-        #userInfo { 
-            position: absolute; top: calc(15px + env(safe-area-inset-top)); right: 15px; 
-            display: none; align-items: center; gap: 8px; z-index: 15; pointer-events: auto;
-            background: rgba(10, 12, 16, 0.8); padding: 5px 10px; border-radius: 20px;
-            border: 1px solid rgba(0, 243, 255, 0.3);
-        }
-        #userInfo img { width: 24px; height: 24px; border-radius: 50%; }
-        #userInfo span { font-size: 12px; color: #00f3ff; font-family: 'Orbitron', sans-serif; }
-    </style>
-</head>
-<body>
-
-    <div id="dailyRewardPopup">NOTIFICATION</div>
-
-    <!-- RESET ONAY DIYALOGU -->
-    <div id="resetConfirmDialog" class="confirm-dialog">
-        <div class="confirm-box">
-            <h3>⚠️ Wipe All Data?</h3>
-            <p>This will erase all your progress, coins, skins and upgrades. This cannot be undone.</p>
-            <button class="action-btn revive" id="confirmResetBtn" style="width: 100%;">Yes, Wipe Everything</button>
-            <button class="action-btn secondary" id="cancelResetBtn" style="width: 100%;">Cancel</button>
-        </div>
-    </div>
-
-    <!-- CrazyGames kullanıcı info -->
-    <div id="userInfo">
-        <img id="userAvatar" src="" alt="">
-        <span id="userName">Guest</span>
-    </div>
-
-    <!-- ANA MENÜ - SADELEŞTİRİLMİŞ -->
-    <div id="welcomeScreen" class="screen active">
-        <div class="cyber-grid"></div>
-        <h2 style="color: #00f3ff;">System Override</h2>
-        <h1>Neon Core</h1>
-
-        <div style="margin-top: 20px;">
-            <button class="action-btn" id="enterMapBtn">▶ Play Campaign</button>
-            <button class="action-btn survival" id="survivalModeBtn">⚡ Survival Mode</button>
-
-            <button class="action-btn" id="freeDailyCoinsBtn" style="background: linear-gradient(45deg, #FFD166, #f39c12); color: #0a0c10; margin-top: 8px;">📺 Free 100 💰 (Daily)</button>
-
-            <div style="display:flex; gap:5px; justify-content:center; margin-top: 15px; flex-wrap: wrap; padding: 0 20px;">
-                <button class="action-btn secondary" id="openLeaderboardBtn" style="width: auto; padding: 10px;">🏆 Scores</button>
-                <button class="action-btn secondary" id="openQuestsBtn" style="width: auto; padding: 10px; color: #92FE9D; border-color: #92FE9D;">📜 Quests</button>
-                <button class="action-btn secondary" id="openSettingsBtn" style="width: auto; padding: 10px;">⚙️ Settings</button>
-            </div>
-            
-            <button class="action-btn invite" id="inviteFriendBtn" style="display:none; width: auto; padding: 8px 15px; margin-top: 10px;">🎮 Invite Friend</button>
-        </div>
-    </div>
-
-    <div id="questsScreen" class="screen">
-        <h2 style="color: #92FE9D; text-shadow: 0 0 15px rgba(146, 254, 157, 0.4);">DAILY QUESTS</h2>
-        <div class="coin-text" style="margin-bottom: 20px;">💰 <span id="questCoins">0</span></div>
-        <div class="box" id="questList" style="width: 320px; max-height: 50vh; overflow-y: auto; padding: 10px;">
-        </div>
-        <button class="action-btn secondary" id="questsToMenuBtn">Main Menu</button>
-    </div>
-
-    <!-- AYARLAR - Nickname ve Wipe Data burada -->
-    <div id="settingsScreen" class="screen">
-        <h2 style="color: #00f3ff;">System Settings</h2>
-
-        <div class="box" style="margin-top: 20px;">
-            <div style="color: #8b949e; font-size: 12px; margin-bottom: 8px;">NICKNAME</div>
-            <div style="display:flex; gap:8px; justify-content:center; align-items:center; margin-bottom: 15px;">
-                <input type="text" id="playerNickname" placeholder="Enter Nickname" maxlength="12" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(0, 243, 255, 0.4); color: #fff; font-family: 'Orbitron', sans-serif; font-size: 14px; padding: 8px; border-radius: 8px; text-align: center; outline: none; width: 120px;">
-                <button class="action-btn secondary" id="saveNickBtn" style="margin:0; width:auto; padding:8px 12px; font-size:11px; border-color:#00f3ff; color:#00f3ff;">Save</button>
-            </div>
-
-            <button class="action-btn" id="toggleSoundBtn" style="width: 100%; margin: 5px 0; font-size: 13px; padding: 10px;">Sound: ON 🔊</button>
-            <button class="action-btn" id="toggleVibBtn" style="width: 100%; margin: 5px 0; font-size: 13px; padding: 10px;">Vibration: ON 📳</button>
-
-            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(239, 71, 111, 0.2);">
-                <div style="color: #8b949e; font-size: 10px; margin-bottom: 5px;">DANGER ZONE</div>
-                <button class="action-btn secondary" id="hardResetBtn" style="width: 100%; font-size: 11px; padding: 8px; opacity: 0.6; color: #EF476F; border-color: rgba(239, 71, 111, 0.3);">Wipe All Data</button>
-            </div>
-        </div>
-        <button class="action-btn secondary" id="settingsToMenuBtn">Main Menu</button>
-    </div>
-
-    <div id="leaderboardScreen" class="screen">
-        <h2 style="color: #FFD166;">HIGH SCORES</h2>
-        <div class="box" id="leaderboardList" style="width: 300px; max-height: 50vh; overflow-y: auto; padding: 10px;">
-        </div>
-        <div style="color: #8b949e; font-size: 11px; margin-bottom: 15px; padding: 0 20px;">Local scores on this device</div>
-        <button class="action-btn" id="globalLbBtn" style="background: linear-gradient(45deg, #4285F4, #34A853); color: white; margin-bottom: 8px;">🌍 Global Leaderboard</button>
-        <button class="action-btn secondary" id="lbToMenuBtn">Main Menu</button>
-    </div>
-
-    <div id="gameUI">
-        <div id="topBar">
-            <div id="lvlText" style="text-shadow: 0 0 10px rgba(0,243,255,0.6); color: #00f3ff;">Layer: 1</div>
-            <div id="progressText" style="color: #ffffff; text-shadow: 0 0 10px rgba(255,255,255,0.5);">0 / 0</div>
-            <button id="pauseBtn">⏸</button>
-        </div>
-        <div id="progressContainer"><div id="progressBar"></div></div>
-        <div id="comboDisplay">COMBO x2</div>
-
-        <div id="targetDisplay"></div>
-        <div id="powerupBar">
-            <button class="power-btn" id="btnSlowMo">Slow-Mo <span id="slowMoCount">0</span></button>
-            <button class="power-btn" id="btnShield">Shield <span id="shieldCount">0</span></button>
-            <button class="power-btn" id="btnEmp">EMP <span id="empCount">0</span></button>
-        </div>
-    </div>
-
-    <div id="mapScreen" class="screen">
-        <div id="mapTopBar">
-            <button class="action-btn secondary" id="mapToMenuBtn" style="width: auto; padding: 8px 15px; font-size:12px; margin:0;">Main Menu</button>
-            <div class="coin-text" style="margin:0; font-size:18px;">💰 <span id="mapCoins">0</span></div>
-            <button class="action-btn secondary" id="goShopBtn" style="width: auto; padding: 8px 15px; font-size:12px; margin:0; color: #00f3ff; border-color: #00f3ff;">Shop</button>
-        </div>
-        <div id="scrollableMap"></div>
-    </div>
-
-    <div id="shopScreen" class="screen">
-        <h2>Black Market</h2>
-        <div class="coin-text" style="margin-bottom: 20px;">💰 <span id="shopCoins">0</span></div>
-        <div class="box" id="shopItemsContainer" style="width: 340px; padding: 15px; max-height: 60vh; overflow-y: auto;"></div>
-        <div style="display:flex; gap:10px;">
-            <button class="action-btn secondary" id="closeShopBtn" style="width:140px; padding:10px;">Back to Map</button>
-            <button class="action-btn secondary" id="shopToMenuBtn" style="width:140px; padding:10px;">Main Menu</button>
-        </div>
-    </div>
-
-    <div id="pauseScreen" class="screen">
-        <h2 style="color: #fff;">System Paused</h2>
-        <button class="action-btn" id="resumeBtn">Resume</button>
-        <button class="action-btn secondary" id="quickRestartBtnPause">Restart Layer</button>
-        <button class="action-btn secondary" id="pauseToMenuBtn">Main Menu</button>
-    </div>
-
-    <div id="resumeCountdownScreen" class="screen">
-        <div id="countdownNumber">3</div>
-    </div>
-
-    <div id="levelCompleteScreen" class="screen">
-        <h1 style="color: #ffffff; text-shadow: 0 0 15px rgba(255,255,255,0.8);">Cleared!</h1>
-        <div class="box">
-            <div style="color: #8b949e; margin-bottom: 10px;">Data Extracted</div>
-            <div class="coin-text" id="rewardCoins" style="font-size: 28px;">+0 💰</div>
-            <div id="comboBonusText" style="color: #00f3ff; font-size: 12px; font-weight: bold;"></div>
-        </div>
-        <button class="action-btn" id="doubleCoinsBtn" style="background: linear-gradient(45deg, #00C9FF, #92FE9D); color: #0a0c10; margin-bottom: 8px;">Watch Ad → 2x Coins 📺</button>
-        <button class="action-btn" id="nextLevelBtn">Next Layer</button>
-        <div style="display:flex; gap:10px;">
-            <button class="action-btn secondary" id="hubReturnBtn" style="width:120px; padding:10px;">Map</button>
-            <button class="action-btn secondary" id="completeToMenuBtn" style="width:120px; padding:10px;">Main Menu</button>
-        </div>
-    </div>
-
-    <div id="gameOverScreen" class="screen">
-        <h1 style="color: #EF476F;">System Failure!</h1>
-        <div class="box" id="failStats"></div>
-        <button class="action-btn revive" id="reviveBtn">Revive (25 💰)</button>
-        <button class="action-btn" id="reviveAdBtn" style="background: linear-gradient(45deg, #00C9FF, #92FE9D); color: #0a0c10; margin-bottom: 10px;">Watch Ad to Revive 📺</button>
-        <button class="action-btn" id="quickRestartBtn">Quick Retry</button>
-        <div style="display:flex; gap:10px; margin-top: 5px;">
-            <button class="action-btn secondary" id="failHubBtn" style="width:120px; padding:10px;">Map</button>
-            <button class="action-btn secondary" id="failToMenuBtn" style="width:120px; padding:10px;">Menu</button>
-        </div>
-    </div>
-
-    <canvas id="gameCanvas"></canvas>
-
-    <script>
-        // =========================================================
-        // ADMOB NATIVE BRIDGE (Cordova/Capacitor)
-        // =========================================================
-        // Production'da gerekli plugin: cordova-plugin-admob-plus
-        // Veya Capacitor için: @capacitor-community/admob
-        //
-        // Aşağıdaki ID'leri kendi AdMob hesabından aldıklarınla değiştir:
-        // 1. https://apps.admob.com → Apps → Add app (Android)
-        // 2. Ad units → Create: Interstitial + Rewarded
-        // 3. Test ederken Google'ın TEST ID'leri kullan (bunlar zaten aşağıda)
-        // =========================================================
-
-        // AdMob ID'leri config.js dosyasından geliyor
-        const ADMOB_CONFIG = window.GAME_CONFIG.admob;
-        const PLAY_GAMES_CONFIG = window.GAME_CONFIG.playGames;
-
-        let admobReady = false;
-        let interstitialLoaded = false;
-        let rewardedLoaded = false;
-
-        // Cloud save / kullanıcı sistemi YOK - hepsi localStorage
-        let isCloudSaveEnabled = false;
-
-        // Reklam frekans kontrolü - kullanıcı deneyimi için
-        let lastAdTimestamp = 0;
-        const AD_COOLDOWN_MS = 120000; // 2 dakika - kullanıcıyı sinir etmeyelim
-
-        function canShowAd() {
-            return (Date.now() - lastAdTimestamp) >= AD_COOLDOWN_MS;
-        }
-        function markAdShown() {
-            lastAdTimestamp = Date.now();
-        }
-
-        // AdMob plugin'in hazır olmasını bekle (Capacitor deviceready ile gelir)
-        let _adMobInitTriggered = false;
-        function triggerAdMobInit() {
-            if (_adMobInitTriggered) return;
-            _adMobInitTriggered = true;
-            initAdMob();
-        }
-        document.addEventListener('deviceready', triggerAdMobInit, false);
-        // Capacitor'da deviceready bazen gelmez - DOMContentLoaded'da da dene
-        if (document.readyState === 'complete' || document.readyState === 'interactive') {
-            setTimeout(triggerAdMobInit, 500);
-        } else {
-            document.addEventListener('DOMContentLoaded', () => setTimeout(triggerAdMobInit, 500));
-        }
-
-        // Eğer Capacitor olmadan tarayıcıda test ediliyorsa fallback
-        setTimeout(() => {
-            if (!admobReady) {
-                console.log("[AdMob] Plugin yok veya init olamadı - browser/test modu");
-            }
-        }, 5000);
-
-        async function initAdMob() {
-            if (admobReady) return; // Zaten init edildi
-            try {
-                // Capacitor plugin'ini bul
-                const Capacitor = window.Capacitor;
-                if (!Capacitor || !Capacitor.isNativePlatform || !Capacitor.isNativePlatform()) {
-                    console.log("[AdMob] Native platform değil (web browser)");
-                    return;
-                }
-
-                // @capacitor-community/admob plugin'i yüklü mü kontrol et
-                const AdMob = Capacitor.Plugins.AdMob;
-                if (!AdMob) {
-                    console.log("[AdMob] AdMob plugin bulunamadı");
-                    return;
-                }
-
-                // Plugin'i başlat
-                await AdMob.initialize({
-                    requestTrackingAuthorization: false,
-                    testingDevices: [],
-                    initializeForTesting: false
-                });
-                console.log("[AdMob] Initialize() complete");
-                console.log("[AdMob] Using interstitialId:", ADMOB_CONFIG.interstitialId);
-                console.log("[AdMob] Using rewardedId:", ADMOB_CONFIG.rewardedId);
-
-                // Global referansı sakla
-                window.AdMobPlugin = AdMob;
-
-                // Interstitial event listener'ları
-                AdMob.addListener('interstitialAdLoaded', () => {
-                    interstitialLoaded = true;
-                    console.log("✓ Interstitial LOADED");
-                });
-                AdMob.addListener('interstitialAdFailedToLoad', (err) => {
-                    interstitialLoaded = false;
-                    console.error("Interstitial FAILED:", JSON.stringify(err));
-                });
-                AdMob.addListener('interstitialAdDismissed', () => {
-                    interstitialLoaded = false;
-                    muteGameAudio(false);
-                    AdMob.prepareInterstitial({ adId: ADMOB_CONFIG.interstitialId }).catch(e => console.error("re-prepare interstitial:", e));
-                    if (window._pendingInterstitialCb) {
-                        const cb = window._pendingInterstitialCb;
-                        window._pendingInterstitialCb = null;
-                        markAdShown();
-                        cb(true);
-                    }
-                });
-
-                // Rewarded event listener'ları
-                AdMob.addListener('rewardedVideoAdLoaded', () => {
-                    rewardedLoaded = true;
-                    console.log("✓ Rewarded LOADED");
-                });
-                AdMob.addListener('rewardedVideoAdFailedToLoad', (err) => {
-                    rewardedLoaded = false;
-                    console.error("Rewarded FAILED:", JSON.stringify(err));
-                });
-                AdMob.addListener('rewardedVideoAdReward', (reward) => {
-                    console.log("✓ Reward earned:", JSON.stringify(reward));
-                    window._rewardEarned = true;
-                });
-                AdMob.addListener('rewardedVideoAdDismissed', () => {
-                    rewardedLoaded = false;
-                    muteGameAudio(false);
-                    AdMob.prepareRewardVideoAd({ adId: ADMOB_CONFIG.rewardedId }).catch(e => console.error("re-prepare rewarded:", e));
-                    if (window._rewardEarned && window._pendingRewardCb) {
-                        const cb = window._pendingRewardCb;
-                        window._pendingRewardCb = null;
-                        window._pendingRewardFailCb = null;
-                        window._rewardEarned = false;
-                        cb();
-                    } else if (window._pendingRewardFailCb) {
-                        const cb = window._pendingRewardFailCb;
-                        window._pendingRewardCb = null;
-                        window._pendingRewardFailCb = null;
-                        cb();
-                    }
-                });
-
-                admobReady = true;
-                window.ADMOB_READY = true;
-                console.log("[AdMob] Ready, preparing first ads...");
-
-                // İlk reklamları yüklemeyi dene
-                try {
-                    console.log("[AdMob] Calling prepareInterstitial...");
-                    const r1 = await AdMob.prepareInterstitial({ adId: ADMOB_CONFIG.interstitialId });
-                    console.log("[AdMob] prepareInterstitial returned:", JSON.stringify(r1));
-                } catch(e) {
-                    console.error("prepareInterstitial CATCH:", e.message || JSON.stringify(e));
-                }
-
-                try {
-                    console.log("[AdMob] Calling prepareRewardVideoAd...");
-                    const r2 = await AdMob.prepareRewardVideoAd({ adId: ADMOB_CONFIG.rewardedId });
-                    console.log("[AdMob] prepareRewardVideoAd returned:", JSON.stringify(r2));
-                } catch(e) {
-                    console.error("prepareRewardVideoAd CATCH:", e.message || JSON.stringify(e));
-                }
-            } catch (e) {
-                console.error("[AdMob] Init error:", e.message || JSON.stringify(e));
-            }
-        }
-
-        // ========== Game Event Stub'ları (CrazyGames API uyumlu kalsın diye) ==========
-        function crazyGameplayStart() { /* AdMob analytics yok */ }
-        function crazyGameplayStop() { /* AdMob analytics yok */ }
-        function crazyHappytime() { /* no-op */ }
-        function crazySadtime() { /* no-op */ }
-        function crazyLoadingStart() { /* no-op */ }
-        function crazyLoadingStop() { /* no-op */ }
-
-        // ========== INTERSTITIAL (Midgame) Reklam ==========
-        async function crazyMidgameAd(callback) {
-            if (!canShowAd()) {
-                if (callback) callback(false);
-                return;
-            }
-            if (admobReady && interstitialLoaded && window.AdMobPlugin) {
-                try {
-                    muteGameAudio(true);
-                    window._pendingInterstitialCb = (success) => {
-                        if (callback) callback(success);
-                    };
-                    await window.AdMobPlugin.showInterstitial();
-                } catch (e) {
-                    console.log("[AdMob] Interstitial error:", e);
-                    muteGameAudio(false);
-                    window._pendingInterstitialCb = null;
-                    if (callback) callback(false);
-                }
-            } else {
-                // Hazır değilse skip - kullanıcı deneyimini bozma
-                console.log("[AdMob] Interstitial not ready, skipping");
-                if (callback) callback(false);
-            }
-        }
-
-        // ========== REWARDED (Ödüllü) Reklam ==========
-        async function crazyRewardedAd(onSuccess, onFail) {
-            if (admobReady && rewardedLoaded && window.AdMobPlugin) {
-                try {
-                    muteGameAudio(true);
-                    window._rewardEarned = false;
-                    window._pendingRewardCb = onSuccess;
-                    window._pendingRewardFailCb = onFail;
-                    await window.AdMobPlugin.showRewardVideoAd();
-                } catch (e) {
-                    console.log("[AdMob] Rewarded error:", e);
-                    muteGameAudio(false);
-                    window._pendingRewardCb = null;
-                    window._pendingRewardFailCb = null;
-                    if (onFail) onFail();
-                }
-            } else {
-                // Rewarded hazır değilse, kullanıcıya test modu ödülü verme!
-                // Bunun yerine fail et ki kullanıcı tekrar denesin
-                console.log("[AdMob] Rewarded not ready - telling user to retry");
-                if (onFail) onFail();
-            }
-        }
-
-        // Banner placeholder (kullanılmıyor şu an)
-        function crazyRequestBanner() { /* opsiyonel */ }
-        function crazyClearBanner() { /* opsiyonel */ }
-
-        // Cloud save stub'ları - hep localStorage kullan
-        async function initCloudSave() { isCloudSaveEnabled = false; }
-        async function saveDataToCloud() { /* no-op - localStorage zaten yeterli */ }
-        async function loadDataFromCloud() { return null; }
-        function queueCloudSave() { /* no-op - sadece localStorage kullanılıyor */ }
-
-        // Invite arkadaş - native share kullan (Web Share API)
-        async function crazyInviteFriend() {
-            if (navigator.share) {
-                try {
-                    await navigator.share({
-                        title: 'Neon Core',
-                        text: 'Check out Neon Core - the addictive ring shooter!',
-                        url: 'https://play.google.com/store/apps/details?id=com.yourcompany.neoncore'
-                    });
-                } catch(e) {}
-            } else {
-                showNotification("Share not supported", "#EF476F", "#ff0055");
-            }
-        }
-
-        // User info gizle (CrazyGames özelliği değil)
-        function displayUserInfo() {}
-        function hideUserInfo() {
-            const el = document.getElementById('userInfo');
-            if (el) el.style.display = 'none';
-        }
-
-        // Reklam sırasında oyun sesini sustur/aç
-        function muteGameAudio(mute) {
-            if (typeof audioCtx !== 'undefined' && audioCtx) {
-                try {
-                    if (mute) {
-                        audioCtx.suspend();
-                    } else {
-                        audioCtx.resume();
-                    }
-                } catch(e) {}
-            }
-        }
-
-        // =========================================================
-        // GOOGLE PLAY GAMES SERVICES (Global Leaderboard)
-        // =========================================================
-        // Plugin: cordova-plugin-play-games-services-fix VEYA @capacitor-community/play-games
-        // Devre dışı bırakmak için config.js'de playGames.enabled = false yap
-
-        let playGamesReady = false;
-        let playGamesSignedIn = false;
-
-        async function initPlayGames() {
-            if (!PLAY_GAMES_CONFIG.enabled) {
-                console.log("[PlayGames] Devre dışı (config'de kapatılmış)");
-                return;
-            }
-            try {
-                // Cordova plugin (cordova-plugin-play-games-services-fix)
-                if (typeof window.playGamesServices !== 'undefined') {
-                    await new Promise((resolve, reject) => {
-                        window.playGamesServices.auth(resolve, reject);
-                    });
-                    playGamesSignedIn = true;
-                    playGamesReady = true;
-                    console.log("[PlayGames] Signed in via Cordova");
-                }
-                // Capacitor plugin (@openforge/capacitor-play-games)
-                else if (typeof window.PlayGames !== 'undefined') {
-                    await window.PlayGames.signIn();
-                    playGamesSignedIn = true;
-                    playGamesReady = true;
-                    console.log("[PlayGames] Signed in via Capacitor");
-                } else {
-                    console.log("[PlayGames] Plugin bulunamadı - sadece local leaderboard");
-                }
-            } catch(e) {
-                console.log("[PlayGames] Sign-in error:", e);
-            }
-        }
-
-        // Skoru global leaderboard'a gönder
-        async function submitGlobalScore(score) {
-            if (!playGamesReady || !playGamesSignedIn || !PLAY_GAMES_CONFIG.leaderboardId) return;
-            try {
-                if (typeof window.playGamesServices !== 'undefined') {
-                    window.playGamesServices.submitScore({
-                        score: score,
-                        leaderboardId: PLAY_GAMES_CONFIG.leaderboardId
-                    }, () => console.log("[PlayGames] Score submitted:", score),
-                       (e) => console.log("[PlayGames] Submit error:", e));
-                }
-                else if (typeof window.PlayGames !== 'undefined') {
-                    await window.PlayGames.submitScore({
-                        leaderboardId: PLAY_GAMES_CONFIG.leaderboardId,
-                        score: score
-                    });
-                    console.log("[PlayGames] Score submitted:", score);
-                }
-            } catch(e) {
-                console.log("[PlayGames] Submit error:", e);
-            }
-        }
-
-        // Native leaderboard ekranını aç (Google'ın kendi UI'ı)
-        async function showGlobalLeaderboard() {
-            if (!playGamesReady || !PLAY_GAMES_CONFIG.leaderboardId) {
-                showNotification("Global leaderboard not available", "#EF476F", "#ff0055");
-                return;
-            }
-            try {
-                if (typeof window.playGamesServices !== 'undefined') {
-                    window.playGamesServices.showLeaderboard({
-                        leaderboardId: PLAY_GAMES_CONFIG.leaderboardId
-                    });
-                }
-                else if (typeof window.PlayGames !== 'undefined') {
-                    await window.PlayGames.showLeaderboard({
-                        leaderboardId: PLAY_GAMES_CONFIG.leaderboardId
-                    });
-                }
-            } catch(e) {
-                console.log("[PlayGames] Show leaderboard error:", e);
-            }
-        }
-
-        // App ready olduğunda Play Games'i de başlat
-        document.addEventListener('deviceready', initPlayGames, false);
-
-
-        // =========================================================
-        // GAME CODE
-        // =========================================================
-
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-
-        const screens = {
-            welcome: document.getElementById('welcomeScreen'), map: document.getElementById('mapScreen'),
-            shop: document.getElementById('shopScreen'), pause: document.getElementById('pauseScreen'),
-            complete: document.getElementById('levelCompleteScreen'), gameOver: document.getElementById('gameOverScreen'),
-            gameUI: document.getElementById('gameUI'),
-            leaderboard: document.getElementById('leaderboardScreen'),
-            settings: document.getElementById('settingsScreen'),
-            quests: document.getElementById('questsScreen')
-        };
-
-        function showScreen(screenName) {
-            Object.values(screens).forEach(s => { if(s) s.classList.remove('active'); });
-            screens.gameUI.style.display = 'none';
-            if(screenName && screens[screenName]) screens[screenName].classList.add('active');
-            // Welcome açıldığında daily ad butonunu güncelle
-            if (screenName === 'welcome') {
-                try { updateFreeDailyBtn(); } catch(e) {}
-            }
-        }
-
-        window.addEventListener('pointerdown', initAudio, { once: true });
-
-        let audioCtx;
-        function initAudio() {
-            try {
-                const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
-                if(!AudioCtxClass) return;
-                if(!audioCtx) audioCtx = new AudioCtxClass();
-                if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-            } catch(e) {}
-        }
-
-        function playSound(type, comboVal = 0) {
-            if(!savedData.soundEnabled) return;
-
-            try {
-                if(!audioCtx) return;
-                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-                osc.connect(gain); gain.connect(audioCtx.destination); let now = audioCtx.currentTime;
-                if (type === 'hit') {
-                    let baseFreq = 800 + (comboVal * 50); let endFreq = 1500 + (comboVal * 100);
-                    osc.type = 'sine'; osc.frequency.setValueAtTime(baseFreq, now); osc.frequency.exponentialRampToValueAtTime(endFreq, now + 0.1);
-                    gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-                    osc.start(now); osc.stop(now + 0.1);
-                }
-                else if (type === 'error') { osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now); osc.frequency.exponentialRampToValueAtTime(100, now + 0.3); gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3); osc.start(now); osc.stop(now + 0.3); }
-                else if (type === 'boss') { osc.type = 'square'; osc.frequency.setValueAtTime(100, now); osc.frequency.linearRampToValueAtTime(50, now + 0.5); gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5); osc.start(now); osc.stop(now + 0.5); }
-                else if (type === 'win') { osc.type = 'triangle'; osc.frequency.setValueAtTime(400, now); osc.frequency.setValueAtTime(600, now + 0.1); osc.frequency.setValueAtTime(800, now + 0.2); gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 0.4); osc.start(now); osc.stop(now + 0.4); }
-            } catch (e) {}
-        }
-
-        let ambientDust = []; let warpLines = [];
-        function initDust() {
-            ambientDust = [];
-            for(let i=0; i<30; i++) {
-                ambientDust.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, s: Math.random() * 1.5 + 0.5, v: Math.random() * 0.5 + 0.1, alpha: Math.random() * 0.3 + 0.1 });
-            }
-        }
-
-        function resize() {
-            canvas.width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth || 360;
-            canvas.height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight || 640;
-            if(ambientDust.length === 0) initDust();
-        }
-        window.addEventListener('resize', resize); resize();
-
-        function drawAmbientDust() {
-            ambientDust.forEach(p => {
-                p.y -= p.v; if(p.y < -10) { p.y = canvas.height + 10; p.x = Math.random() * canvas.width; }
-                ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI*2); ctx.fillStyle = `rgba(200, 240, 255, ${p.alpha})`; ctx.fill();
-            });
-        }
-
-        const RING_SKINS = {
-            'Classic': { price: 0, ads: 0 },
-            'Cyber': { price: 1500, ads: 3 },
-            'Blade': { price: 3000, ads: 5 },
-            'Dragon': { price: 10000, ads: 8 },
-            'Plasma': { price: 18000, ads: 12 },
-            'Orbit': { price: 30000, ads: 15 }
-        };
-        const CORE_SKINS = {
-            'Pure White': { price: 0, ads: 0 },
-            'Crimson Eye': { price: 1500, ads: 3 },
-            'Abyss': { price: 3000, ads: 5 },
-            'Neon Pulse': { price: 15000, ads: 10 },
-            'Golden Star': { price: 25000, ads: 15 }
-        };
-
-        const CONSUMABLE_PRICES = {
-            'shield': 250,
-            'slowMo': 100,
-            'emp': 400
-        };
-
-        let defaultData = {
-            nickname: "",
-            maxLevelUnlocked: 1,
-            coins: 0,
-            inventory: { slowMo: 0, shield: 0, emp: 0 },
-            activeRingSkin: 'Classic', unlockedRingSkins: ['Classic'],
-            activeCoreSkin: 'Pure White', unlockedCoreSkins: ['Pure White'],
-            upgrades: { coreHp: 0, coinMultiplier: 0 },
-            highScoreSurvival: 0, lastLoginDate: "", adProgress: {},
-            soundEnabled: true,
-            vibrationEnabled: true,
-            quests: { date: "", list: [] },
-            localLeaderboard: [],
-            timestamp: 0
-        };
-
-        let savedData;
-        try {
-            let rawData = localStorage.getItem('neonSave_cg_v1');
-            if (rawData) {
-                try {
-                    savedData = JSON.parse(decodeURIComponent(atob(rawData)));
-                } catch(err) {
-                    savedData = JSON.parse(rawData);
-                }
-            }
-        } catch(e) {}
-
-        if(!savedData || typeof savedData !== 'object') { savedData = defaultData; }
-        else {
-            if(!savedData.upgrades) savedData.upgrades = { coreHp: 0, coinMultiplier: 0 };
-            if(!savedData.adProgress) savedData.adProgress = {};
-            if(!savedData.activeRingSkin) { savedData.activeRingSkin = 'Classic'; savedData.unlockedRingSkins = ['Classic']; }
-            if(!savedData.activeCoreSkin) { savedData.activeCoreSkin = 'Pure White'; savedData.unlockedCoreSkins = ['Pure White']; }
-            if(!savedData.inventory) savedData.inventory = { slowMo: 0, shield: 0, emp: 0 };
-            if(savedData.inventory.emp === undefined) savedData.inventory.emp = 0;
-            if(savedData.nickname === undefined) savedData.nickname = "";
-            if(savedData.soundEnabled === undefined) savedData.soundEnabled = true;
-            if(savedData.vibrationEnabled === undefined) savedData.vibrationEnabled = true;
-            if(savedData.quests === undefined) savedData.quests = { date: "", list: [] };
-            if(savedData.localLeaderboard === undefined) savedData.localLeaderboard = [];
-            if(savedData.timestamp === undefined) savedData.timestamp = 0;
-        }
-
-        if (!savedData.startingGiftClaimed) {
-            savedData.inventory.slowMo += 5;
-            savedData.inventory.shield += 5;
-            savedData.inventory.emp += 5;
-            savedData.startingGiftClaimed = true;
-        }
-
-        function saveDataLocal() {
-            let encodedData = btoa(encodeURIComponent(JSON.stringify(savedData)));
-            localStorage.setItem('neonSave_cg_v1', encodedData);
-        }
-
-        function saveData() {
-            saveDataLocal();
-            // Bulut save varsa onu da güncelle (debounced)
-            queueCloudSave();
-        }
-
-        function showNotification(text, color1, color2) {
-            let popup = document.getElementById('dailyRewardPopup');
-            popup.innerText = text;
-            popup.style.background = `linear-gradient(45deg, ${color1}, ${color2})`;
-            popup.style.transform = 'translate(-50%, 20px)';
-            setTimeout(() => {
-                popup.style.transform = 'translate(-50%, -150px)';
-            }, 3500);
-        }
-
-        function addToLocalLeaderboard(score) {
-            let name = savedData.nickname || "Player";
-            savedData.localLeaderboard.push({ name: name, score: score, date: new Date().toDateString() });
-            savedData.localLeaderboard.sort((a, b) => b.score - a.score);
-            savedData.localLeaderboard = savedData.localLeaderboard.slice(0, 10);
-            saveData();
-            // Global leaderboard'a da gönder (Play Games açıksa)
-            submitGlobalScore(score);
-        }
-
-        function loadLocalLeaderboard() {
-            let container = document.getElementById('leaderboardList');
-            if (!savedData.localLeaderboard || savedData.localLeaderboard.length === 0) {
-                container.innerHTML = '<div style="color: #8b949e; padding: 20px;">No scores yet.<br>Play Survival Mode!</div>';
-                return;
-            }
-            let html = "";
-            savedData.localLeaderboard.forEach((entry, idx) => {
-                html += `<div class="leaderboard-item"><span>${idx+1}. ${entry.name.substring(0,12)}</span><span>${entry.score}</span></div>`;
-            });
-            container.innerHTML = html;
-        }
-
-        window.updateQuest = function(id, amount) {
-            if(!savedData.quests || !savedData.quests.list) return;
-            let q = savedData.quests.list.find(x => x.id === id);
-            if(q && !q.claimed && q.progress < q.target) {
-                q.progress += amount;
-                if(q.progress >= q.target) {
-                    q.progress = q.target;
-                    showNotification("QUEST COMPLETED: " + q.desc, "#00C9FF", "#92FE9D");
-                    playSound('win');
-                    crazyHappytime();
-                }
-                saveData();
-                if(screens.quests.classList.contains('active')) renderQuests();
-            }
-        }
-
-        function renderQuests() {
-            document.getElementById('questCoins').innerText = savedData.coins;
-            let container = document.getElementById('questList');
-            container.innerHTML = "";
-
-            savedData.quests.list.forEach((q, idx) => {
-                let isDone = q.progress >= q.target;
-                let btnHtml = "";
-                if(q.claimed) {
-                    btnHtml = `<button class="action-btn secondary" style="width:80px; padding:5px; font-size:10px;" disabled>Claimed</button>`;
-                } else if(isDone) {
-                    btnHtml = `<button class="action-btn" style="width:80px; padding:5px; font-size:10px; background:linear-gradient(45deg, #00C9FF, #92FE9D); color:#000;" onclick="claimQuest(${idx})">Claim</button>`;
-                } else {
-                    btnHtml = `<div style="font-size:12px; color:#8b949e; margin-right:5px;">${q.progress}/${q.target}</div>`;
-                }
-
-                container.innerHTML += `
-                    <div class="shop-item">
-                        <div class="shop-item-left"><strong>${q.desc}</strong><small>Reward: ${q.reward} 💰</small></div>
-                        <div class="shop-item-right" style="align-items:flex-end;">${btnHtml}</div>
-                    </div>
-                `;
-            });
-        }
-
-        window.claimQuest = function(idx) {
-            initAudio();
-            let q = savedData.quests.list[idx];
-            if(q && !q.claimed && q.progress >= q.target) {
-                q.claimed = true;
-                savedData.coins += q.reward;
-                playSound('win');
-                crazyHappytime();
-                saveData();
-                renderQuests();
-            }
-        }
-
-        function updateSettingsUI() {
-            document.getElementById('toggleSoundBtn').innerText = savedData.soundEnabled ? "Sound: ON 🔊" : "Sound: OFF 🔇";
-            document.getElementById('toggleVibBtn').innerText = savedData.vibrationEnabled ? "Vibration: ON 📳" : "Vibration: OFF 📴";
-            if (savedData.nickname) {
-                document.getElementById('playerNickname').value = savedData.nickname;
-            }
-        }
-
-        window.onload = () => {
-            updateSettingsUI();
-
-            let today = new Date().toDateString();
-
-            if(!savedData.quests || savedData.quests.date !== today) {
-                savedData.quests = {
-                    date: today,
-                    list: [
-                        { id: 'shatter', desc: 'Shatter 15 Rings', target: 15, progress: 0, reward: 250, claimed: false },
-                        { id: 'survival', desc: 'Play Survival Mode 2 Times', target: 2, progress: 0, reward: 150, claimed: false },
-                        { id: 'powerup', desc: 'Use 3 Power-ups', target: 3, progress: 0, reward: 100, claimed: false }
-                    ]
-                };
-                saveData();
-            }
-
-            if (savedData.startingGiftClaimed && !savedData.giftNotificationShown) {
-                setTimeout(() => {
-                    showNotification("STARTING GIFT: 5x ALL POWER-UPS!", "#EF476F", "#00f3ff");
-                }, 1000);
-                savedData.giftNotificationShown = true;
-                saveData();
-            }
-
-            if(savedData.lastLoginDate !== today) {
-                savedData.lastLoginDate = today; savedData.coins += 200; saveData();
-                showNotification("DAILY LOGIN REWARD: +200 💰", "#FFD166", "#ff9800");
-            }
-
-            // Free daily ad butonunu init et
-            try { updateFreeDailyBtn(); } catch(e) {}
-        };
-
-        document.getElementById('openQuestsBtn').onclick = () => { initAudio(); showScreen('quests'); renderQuests(); };
-        document.getElementById('questsToMenuBtn').onclick = () => { initAudio(); showScreen('welcome'); };
-
-        document.getElementById('openSettingsBtn').onclick = () => { initAudio(); showScreen('settings'); updateSettingsUI(); };
-        document.getElementById('settingsToMenuBtn').onclick = () => { initAudio(); showScreen('welcome'); };
-
-        document.getElementById('toggleSoundBtn').onclick = () => { savedData.soundEnabled = !savedData.soundEnabled; saveData(); updateSettingsUI(); playSound('hit'); };
-        document.getElementById('toggleVibBtn').onclick = () => { savedData.vibrationEnabled = !savedData.vibrationEnabled; saveData(); updateSettingsUI(); if(savedData.vibrationEnabled && navigator.vibrate) navigator.vibrate(50); };
-
-        document.getElementById('saveNickBtn').onclick = () => {
-            initAudio();
-            let nameVal = document.getElementById('playerNickname').value.trim();
-            if(nameVal) {
-                savedData.nickname = nameVal;
-                saveData();
-                playSound('win');
-                let btn = document.getElementById('saveNickBtn');
-                btn.innerText = "Saved!";
-                setTimeout(() => { btn.innerText = "Save"; }, 1500);
-            }
-        };
-
-        document.getElementById('hardResetBtn').onclick = () => {
-            initAudio();
-            document.getElementById('resetConfirmDialog').classList.add('active');
-        };
-        document.getElementById('confirmResetBtn').onclick = () => {
-            localStorage.removeItem('neonSave_cg_v1');
-            location.reload();
-        };
-        document.getElementById('cancelResetBtn').onclick = () => {
-            document.getElementById('resetConfirmDialog').classList.remove('active');
-        };
-
-        // Invite friend butonu
-        document.getElementById('inviteFriendBtn').onclick = () => {
-            initAudio();
-            crazyInviteFriend();
-        };
-
-        // ========== DAILY FREE COINS - Rewarded Ad ==========
-        const DAILY_FREE_AD_LIMIT = 5; // Mobil için biraz daha cömert (engagement artırır)
-        const DAILY_FREE_REWARD = 100;
-
-        function updateFreeDailyBtn() {
-            const btn = document.getElementById('freeDailyCoinsBtn');
-            if (!btn) return;
-            let today = new Date().toDateString();
-            if (!savedData.freeDailyAds || savedData.freeDailyAds.date !== today) {
-                savedData.freeDailyAds = { date: today, used: 0 };
-                saveData();
-            }
-            const remaining = DAILY_FREE_AD_LIMIT - savedData.freeDailyAds.used;
-            if (remaining <= 0) {
-                btn.style.opacity = "0.4";
-                btn.style.pointerEvents = "none";
-                btn.innerText = "✓ Daily Limit Reached";
-            } else {
-                btn.style.opacity = "1";
-                btn.style.pointerEvents = "auto";
-                btn.innerText = `📺 Free ${DAILY_FREE_REWARD} 💰 (${remaining}/${DAILY_FREE_AD_LIMIT})`;
-            }
-        }
-
-        document.getElementById('freeDailyCoinsBtn').onclick = () => {
-            initAudio();
-            const btn = document.getElementById('freeDailyCoinsBtn');
-            let today = new Date().toDateString();
-            if (!savedData.freeDailyAds || savedData.freeDailyAds.date !== today) {
-                savedData.freeDailyAds = { date: today, used: 0 };
-            }
-            if (savedData.freeDailyAds.used >= DAILY_FREE_AD_LIMIT) return;
-
-            btn.style.pointerEvents = "none";
-            btn.innerText = "Loading Ad...";
-            crazyRewardedAd(() => {
-                savedData.freeDailyAds.used++;
-                savedData.coins += DAILY_FREE_REWARD;
-                saveData();
-                playSound('win');
-                showNotification(`+${DAILY_FREE_REWARD} 💰 EARNED!`, "#FFD166", "#f39c12");
-                updateFreeDailyBtn();
-            }, () => {
-                btn.style.pointerEvents = "auto";
-                updateFreeDailyBtn();
-                showNotification("Ad not available", "#EF476F", "#ff0055");
-            });
-        };
-
-        // ========== 2X COINS - Rewarded Ad ==========
-        document.getElementById('doubleCoinsBtn').onclick = () => {
-            initAudio();
-            if (window.doubleCoinsClaimed) return;
-            const btn = document.getElementById('doubleCoinsBtn');
-            btn.style.pointerEvents = "none";
-            btn.innerText = "Loading Ad...";
-            crazyRewardedAd(() => {
-                window.doubleCoinsClaimed = true;
-                const bonus = window.lastLevelReward || 0;
-                savedData.coins += bonus;
-                saveData();
-                playSound('win');
-                document.getElementById('rewardCoins').innerText = "+" + (bonus * 2) + " 💰 (2x!)";
-                btn.style.opacity = "0.4";
-                btn.innerText = "✓ Doubled!";
-                showNotification("REWARD DOUBLED! +" + bonus + " 💰", "#92FE9D", "#00C9FF");
-                updateGameUI();
-            }, () => {
-                btn.style.pointerEvents = "auto";
-                btn.innerText = "Watch Ad → 2x Coins 📺";
-                showNotification("Ad not available", "#EF476F", "#ff0055");
-            });
-        };
-
-        let playingLevel = 1;
-        const CLASSIC_PALETTE = ['#00f3ff', '#EF476F', '#FFD166', '#aa00ff', '#00ff88'];
-        let currentPalette = CLASSIC_PALETTE;
-
-        let isSurvivalMode = false; let survivalLastScore = 0;
-        let isOverdrive = false;
-        let currentDynamicSpeed = 1.0; let sessionReviveCount = 0;
-        let comboTimeout = null; let levelSpawnCount = 0;
-        let hasUsedAdRevive = false;
-        let laserCharges = 0;
-
-        let levelCompleteCount = 0;
-
-        window.watchAdForShop = function(itemId, type, requiredAds) {
-            initAudio();
-            crazyGameplayStop();
-            crazyRewardedAd(() => {
-                savedData.adProgress[itemId] = (savedData.adProgress[itemId] || 0) + 1;
-                if (savedData.adProgress[itemId] >= requiredAds) {
-                    if (type === 'upgrade') savedData.upgrades[itemId]++;
-                    else if (type === 'coreSkin') { savedData.unlockedCoreSkins.push(itemId); savedData.activeCoreSkin = itemId; }
-                    else if (type === 'ringSkin') { savedData.unlockedRingSkins.push(itemId); savedData.activeRingSkin = itemId; }
-                    else if (type === 'consumable') { savedData.inventory[itemId]++; }
-                    delete savedData.adProgress[itemId];
-                    playSound('win');
-                    crazyHappytime();
-                } else {
-                    playSound('hit');
-                }
-                saveData();
-                generateShop();
-            }, () => {
-                showNotification("Ad not available", "#EF476F", "#ff0055");
-            });
-        };
-
-        function generateMap() {
-            const mapContainer = document.getElementById('scrollableMap'); mapContainer.innerHTML = '';
-            document.getElementById('mapCoins').innerText = savedData.coins;
-            const maxDisplay = Math.min(savedData.maxLevelUnlocked + 15, 1200);
-
-            for (let i = maxDisplay; i >= 1; i--) {
-                let row = document.createElement('div'); row.className = 'map-row';
-                let btn = document.createElement('div'); btn.className = 'map-node'; btn.innerText = i;
-                let isBoss = i % 5 === 0; if(isBoss) btn.classList.add('boss');
-                let offset = Math.sin(i * 0.8) * 60; btn.style.transform = `translateX(${offset}px)`;
-
-                if (i < savedData.maxLevelUnlocked) { btn.classList.add('completed'); btn.onclick = () => checkUnlocksAndStart(i); }
-                else if (i === savedData.maxLevelUnlocked) { btn.classList.add('current'); btn.id = 'currentNode'; btn.onclick = () => checkUnlocksAndStart(i); }
-                else { btn.classList.add('locked'); }
-                row.appendChild(btn); mapContainer.appendChild(row);
-            }
-        }
-
-        function openMapSmoothly() {
-            generateMap(); showScreen('map');
-            setTimeout(() => {
-                let container = document.getElementById('scrollableMap');
-                let node = document.getElementById('currentNode');
-                if (savedData.maxLevelUnlocked <= 3) { container.scrollTop = container.scrollHeight; }
-                else if(node) { node.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-            }, 100);
-        }
-
-        function checkUnlocksAndStart(lvl) {
-            playingLevel = lvl; isSurvivalMode = false; sessionReviveCount = 0;
-            startGame();
-        }
-
-        function generateShop() {
-            document.getElementById('shopCoins').innerText = savedData.coins;
-            const container = document.getElementById('shopItemsContainer'); container.innerHTML = "";
-
-            container.innerHTML += `<div style="text-align:left; color:#00ff88; font-size:12px; margin-bottom:5px;">UPGRADES</div>`;
-
-            let corePrice = 2000 + (savedData.upgrades.coreHp * 1000); let coreAds = savedData.adProgress['coreHp'] || 0;
-            container.innerHTML += `
-                <div class="shop-item">
-                    <div class="shop-item-left"><strong>❤️ Iron Core Lvl ${savedData.upgrades.coreHp}</strong><small>More HP</small></div>
-                    <div class="shop-item-right">
-                        <button class="action-btn buy" onclick="buyUpgrade('coreHp')">${corePrice} 💰</button>
-                        <button class="action-btn ad" onclick="watchAdForShop('coreHp', 'upgrade', 2)">Ad (${coreAds}/2) 📺</button>
-                    </div>
-                </div>`;
-
-            let coinPrice = 1500 + (savedData.upgrades.coinMultiplier * 800); let coinAds = savedData.adProgress['coinMultiplier'] || 0;
-            container.innerHTML += `
-                <div class="shop-item">
-                    <div class="shop-item-left"><strong>📈 Data Miner Lvl ${savedData.upgrades.coinMultiplier}</strong><small>More Coins</small></div>
-                    <div class="shop-item-right">
-                        <button class="action-btn buy" onclick="buyUpgrade('coinMultiplier')">${coinPrice} 💰</button>
-                        <button class="action-btn ad" onclick="watchAdForShop('coinMultiplier', 'upgrade', 2)">Ad (${coinAds}/2) 📺</button>
-                    </div>
-                </div>`;
-
-            container.innerHTML += `<div style="text-align:left; color:#00f3ff; font-size:12px; margin-top:15px; margin-bottom:5px;">CONSUMABLES</div>`;
-
-            let shieldAds = savedData.adProgress['shield'] || 0;
-            container.innerHTML += `
-                <div class="shop-item">
-                    <div class="shop-item-left"><strong>🛡️ Shield</strong><small>Block 1 Hit</small></div>
-                    <div class="shop-item-right">
-                        <button class="action-btn buy" onclick="buyItem('shield')">${CONSUMABLE_PRICES.shield} 💰</button>
-                        <button class="action-btn ad" onclick="watchAdForShop('shield', 'consumable', 1)">Ad (${shieldAds}/1) 📺</button>
-                    </div>
-                </div>`;
-
-            let slowMoAds = savedData.adProgress['slowMo'] || 0;
-            container.innerHTML += `
-                <div class="shop-item">
-                    <div class="shop-item-left"><strong>⏳ Slow-Mo</strong><small>Slows Time</small></div>
-                    <div class="shop-item-right">
-                        <button class="action-btn buy" onclick="buyItem('slowMo')">${CONSUMABLE_PRICES.slowMo} 💰</button>
-                        <button class="action-btn ad" onclick="watchAdForShop('slowMo', 'consumable', 1)">Ad (${slowMoAds}/1) 📺</button>
-                    </div>
-                </div>`;
-
-            let empAds = savedData.adProgress['emp'] || 0;
-            container.innerHTML += `
-                <div class="shop-item">
-                    <div class="shop-item-left"><strong>⚡ EMP Blast</strong><small>Clear Screen</small></div>
-                    <div class="shop-item-right">
-                        <button class="action-btn buy" style="background: linear-gradient(45deg, #EF476F, #ff0055); color:white;" onclick="buyItem('emp')">${CONSUMABLE_PRICES.emp} 💰</button>
-                        <button class="action-btn ad" onclick="watchAdForShop('emp', 'consumable', 2)">Ad (${empAds}/2) 📺</button>
-                    </div>
-                </div>`;
-
-            container.innerHTML += `<div style="text-align:left; color:#ff9800; font-size:12px; margin-top:15px; margin-bottom:5px;">CORE SKINS</div>`;
-            Object.keys(CORE_SKINS).forEach(skinName => {
-                let skinData = CORE_SKINS[skinName];
-                let isUnlocked = savedData.unlockedCoreSkins.includes(skinName); let isActive = savedData.activeCoreSkin === skinName; let btnHtml = '';
-                if(isActive) btnHtml = `<button class="action-btn secondary" style="width:100%; padding: 10px;" disabled>Equipped</button>`;
-                else if(isUnlocked) btnHtml = `<button class="action-btn secondary" style="width:100%; padding: 10px;" onclick="equipCoreSkin('${skinName}')">Equip</button>`;
-                else {
-                    let skinAds = savedData.adProgress[skinName] || 0;
-                    btnHtml = `<button class="action-btn buy" onclick="buyCoreSkin('${skinName}')">${skinData.price} 💰</button>
-                               <button class="action-btn ad" onclick="watchAdForShop('${skinName}', 'coreSkin', ${skinData.ads})">Ad (${skinAds}/${skinData.ads}) 📺</button>`;
-                }
-                container.innerHTML += `<div class="shop-item"><div class="shop-item-left"><strong>◉ ${skinName}</strong></div><div class="shop-item-right">${btnHtml}</div></div>`;
-            });
-
-            container.innerHTML += `<div style="text-align:left; color:#EF476F; font-size:12px; margin-top:15px; margin-bottom:5px;">RING SKINS</div>`;
-            Object.keys(RING_SKINS).forEach(skinName => {
-                let skinData = RING_SKINS[skinName];
-                let isUnlocked = savedData.unlockedRingSkins.includes(skinName); let isActive = savedData.activeRingSkin === skinName; let btnHtml = '';
-                if(isActive) btnHtml = `<button class="action-btn secondary" style="width:100%; padding: 10px;" disabled>Equipped</button>`;
-                else if(isUnlocked) btnHtml = `<button class="action-btn secondary" style="width:100%; padding: 10px;" onclick="equipRingSkin('${skinName}')">Equip</button>`;
-                else {
-                    let skinAds = savedData.adProgress[skinName] || 0;
-                    btnHtml = `<button class="action-btn buy" onclick="buyRingSkin('${skinName}')">${skinData.price} 💰</button>
-                               <button class="action-btn ad" onclick="watchAdForShop('${skinName}', 'ringSkin', ${skinData.ads})">Ad (${skinAds}/${skinData.ads}) 📺</button>`;
-                }
-                container.innerHTML += `<div class="shop-item"><div class="shop-item-left"><strong>⚙️ ${skinName}</strong></div><div class="shop-item-right">${btnHtml}</div></div>`;
-            });
-        }
-
-        window.buyUpgrade = function(type) {
-            let requiredPrice = 0;
-            if(type === 'coreHp') requiredPrice = 2000 + (savedData.upgrades.coreHp * 1000);
-            else if(type === 'coinMultiplier') requiredPrice = 1500 + (savedData.upgrades.coinMultiplier * 800);
-
-            if(requiredPrice > 0 && savedData.coins >= requiredPrice) {
-                savedData.coins -= requiredPrice;
-                savedData.upgrades[type]++;
-                playSound('win');
-                saveData();
-                generateShop();
-            } else playSound('error');
-        };
-
-        window.buyItem = function(type) {
-            let requiredPrice = CONSUMABLE_PRICES[type];
-            if(requiredPrice && savedData.coins >= requiredPrice) {
-                savedData.coins -= requiredPrice;
-                savedData.inventory[type]++;
-                playSound('win');
-                saveData();
-                generateShop();
-            } else playSound('error');
-        };
-
-        window.buyRingSkin = function(skin) {
-            let skinData = RING_SKINS[skin];
-            if(skinData && savedData.coins >= skinData.price) {
-                savedData.coins -= skinData.price;
-                savedData.unlockedRingSkins.push(skin);
-                savedData.activeRingSkin = skin;
-                playSound('win');
-                crazyHappytime();
-                saveData();
-                generateShop();
-            } else playSound('error');
-        };
-
-        window.equipRingSkin = function(skin) { savedData.activeRingSkin = skin; playSound('hit'); saveData(); generateShop(); };
-
-        window.buyCoreSkin = function(skin) {
-            let skinData = CORE_SKINS[skin];
-            if(skinData && savedData.coins >= skinData.price) {
-                savedData.coins -= skinData.price;
-                savedData.unlockedCoreSkins.push(skin);
-                savedData.activeCoreSkin = skin;
-                playSound('win');
-                crazyHappytime();
-                saveData();
-                generateShop();
-            } else playSound('error');
-        };
-
-        window.equipCoreSkin = function(skin) { savedData.activeCoreSkin = skin; playSound('hit'); saveData(); generateShop(); };
-
-        const BASE_RADIUS = 15;
-        const RING_START_GAP = 20;
-        const RING_THICKNESS = 6;
-        const RING_SPACING = 16;
-
-        let rings = []; let levelParamsCache = {}; let score = 0, totalTargetHp = 0, collectedHp = 0;
-        let combo = 0, comboMultiplier = 1.0;
-
-        let lastSpawnedColor = null; let consecutiveColorCount = 0; let bossMechanicTimer = 0;
-
-        let gameState = 'menu';
-        let isSlowMoActive = false, slowMoTimer = 0, isShieldActive = false;
-        let balls = [], particles = [], ripples = [], floatingTexts = [], frameCount = 0;
-        let screenShake = 0; let animationId = null;
-        let gameplayActuallyStarted = false; // SDK için
-
-        function calculateLevelParams(lvl) {
-            let isBoss = lvl % 5 === 0 && !isSurvivalMode;
-            let ringCount = 2; let calcSpeed = 1.0; let calcSpawn = 80;
-
-            if (isSurvivalMode) {
-                let phaseLvl = 1; let basePhaseSpeed = 1.0;
-                if (lvl >= 21) { ringCount = 4; phaseLvl = lvl - 19; basePhaseSpeed = 1.10; }
-                else if (lvl >= 11) { ringCount = 3; phaseLvl = lvl - 9; basePhaseSpeed = 1.05; }
-                else { ringCount = 2; phaseLvl = lvl; basePhaseSpeed = 1.0; }
-                calcSpeed = basePhaseSpeed + (phaseLvl * 0.05);
-                calcSpawn = 65;
-            } else {
-                if (lvl >= 25) {
-                    ringCount = 4;
-                    calcSpeed = 1.1 + (Math.log(lvl - 23) * 0.08);
-                    calcSpawn = Math.max(45, 100 - ((lvl - 25) * 1.5));
-                }
-                else if (lvl >= 10) {
-                    ringCount = 3;
-                    calcSpeed = 1.05 + (Math.log(lvl - 8) * 0.08);
-                    calcSpawn = Math.max(50, 100 - ((lvl - 10) * 1.5));
-                }
-                else {
-                    ringCount = 2;
-                    calcSpeed = lvl < 3 ? 1.0 : (1.0 + (Math.log(lvl) * 0.08));
-                    calcSpawn = lvl < 3 ? 70 : Math.max(55, 100 - (lvl * 2));
-                }
-
-                if(isBoss) calcSpeed *= 0.95;
-                if(isBoss) calcSpawn *= 0.95;
-            }
-
-            let maxHpCap = 10;
-            let baseHp = lvl < 3 ? 3 : (3 + Math.floor(lvl / 5) + savedData.upgrades.coreHp);
-            let ringHp = Math.min(baseHp, maxHpCap);
-            if(isBoss) ringHp = Math.min(ringHp + 1, maxHpCap + 1);
-
-            let typeChances = { zigzag: 0, ninja: 0, rainbow: 0, phantom: 0 };
-            typeChances.zigzag = Math.min(0.25, (lvl > 2 ? (lvl - 2) * 0.03 : 0));
-            typeChances.ninja = Math.min(0.20, (lvl > 4 ? (lvl - 4) * 0.02 : 0));
-            typeChances.rainbow = Math.min(0.08, (lvl > 3 ? 0.06 : 0));
-            typeChances.phantom = Math.min(0.20, (lvl > 6 ? (lvl - 6) * 0.02 : 0));
-
-            levelParamsCache = { isBoss, ringCount, ringHp, speed: calcSpeed, spawnRate: calcSpawn, typeChances };
-        }
-
-        function initLevel() {
-            currentPalette = CLASSIC_PALETTE;
-
-            calculateLevelParams(playingLevel);
-            rings = []; totalTargetHp = 0; collectedHp = 0; screenShake = 0; combo = 0; comboMultiplier = 1.0;
-            lastSpawnedColor = null; consecutiveColorCount = 0; bossMechanicTimer = 0; warpLines = [];
-            isOverdrive = false; currentDynamicSpeed = levelParamsCache.speed; levelSpawnCount = 0;
-
-            laserCharges = 0;
-            hasUsedAdRevive = false;
-
-            updateComboUI();
-
-            let availableColors = [...currentPalette];
-            for (let i = availableColors.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [availableColors[i], availableColors[j]] = [availableColors[j], availableColors[i]];
-            }
-
-            for(let i=0; i<levelParamsCache.ringCount; i++) {
-                addRingToGame(availableColors[i % availableColors.length], levelParamsCache.ringHp, i % 2 === 0 ? 1 : -1);
-            }
-            balls = []; particles = []; ripples = []; floatingTexts = []; isSlowMoActive = false; isShieldActive = false; updateGameUI();
-
-            const targetEl = document.getElementById('targetDisplay');
-
-            if (isSurvivalMode) targetEl.innerText = "TARGET: SURVIVE THE CORE";
-            else if (levelParamsCache.isBoss) targetEl.innerText = "TARGET: SHATTER THE BOSS!";
-            else {
-                let nextBoss = Math.ceil(playingLevel / 5) * 5;
-                targetEl.innerText = `TARGET: CLEAR LAYER (${nextBoss - playingLevel} TO NEXT BOSS)`;
-            }
-            targetEl.style.opacity = 1;
-            setTimeout(() => targetEl.style.opacity = 0, 4000);
-        }
-
-        function addRingToGame(color, hp, rotDir) {
-            let segments = [];
-            let totalSegHp = 0;
-            for(let i=0; i<hp; i++) {
-                let type = 'normal'; let sHp = 1;
-
-                if (playingLevel > 5 && Math.random() < 0.15) {
-                    type = Math.random() < 0.5 ? 'bomb' : 'armor';
-                    if (type === 'armor') sHp = 2;
-                }
-
-                segments.push({ isAlive: true, type: type, hp: sHp });
-                totalSegHp += sHp;
-            }
-            rings.unshift({ color: color, hp: totalSegHp, maxHp: hp, segments: segments, rotationDir: rotDir });
-            totalTargetHp += totalSegHp;
-        }
-
-        function updateComboUI() {
-            const el = document.getElementById('comboDisplay');
-            if (combo >= 15 && !isOverdrive) {
-                isOverdrive = true;
-                let cy = canvas.height * 0.42;
-                createFloatingText(canvas.width/2, cy - 60, "OVERDRIVE INITIATED!", "#EF476F");
-                playSound('win'); screenShake = 15;
-                crazyHappytime();
-            } else if (combo < 15) { isOverdrive = false; }
-
-            if(combo >= 5) {
-                el.innerText = `COMBO x${combo}`;
-                if(comboTimeout) clearTimeout(comboTimeout);
-                el.classList.add('combo-active');
-                if(isOverdrive) el.classList.add('combo-overdrive'); else el.classList.remove('combo-overdrive');
-                comboMultiplier = 1.0 + (Math.floor(combo/5) * 0.5);
-                comboTimeout = setTimeout(() => el.classList.remove('combo-active'), 150);
-            } else { el.style.opacity = "0"; comboMultiplier = 1.0; }
-        }
-
-        function updateGameUI() {
-            if(isSurvivalMode) {
-                document.getElementById('lvlText').innerText = "Survival Mode";
-                document.getElementById('lvlText').style.color = "#aa00ff";
-                document.getElementById('progressText').innerText = "Score: " + collectedHp;
-                document.getElementById('progressBar').style.width = "100%";
-                document.getElementById('progressContainer').style.background = "linear-gradient(90deg, #aa00ff, #EF476F)";
-            } else {
-                document.getElementById('lvlText').innerText = levelParamsCache.isBoss ? "BOSS " + playingLevel : "Layer: " + playingLevel;
-                document.getElementById('lvlText').style.color = levelParamsCache.isBoss ? "#EF476F" : "#00f3ff";
-                document.getElementById('progressText').innerText = collectedHp + " / " + totalTargetHp;
-                document.getElementById('progressBar').style.width = ((collectedHp / totalTargetHp) * 100) + "%";
-                document.getElementById('progressContainer').style.background = "rgba(255,255,255,0.05)";
-            }
-
-            document.getElementById('slowMoCount').innerText = savedData.inventory.slowMo;
-            document.getElementById('shieldCount').innerText = savedData.inventory.shield;
-            document.getElementById('empCount').innerText = savedData.inventory.emp;
-
-            if(savedData.inventory.slowMo > 0) document.getElementById('btnSlowMo').classList.add('has-charges'); else document.getElementById('btnSlowMo').classList.remove('has-charges');
-            if(savedData.inventory.shield > 0) document.getElementById('btnShield').classList.add('has-charges'); else document.getElementById('btnShield').classList.remove('has-charges');
-            if(savedData.inventory.emp > 0) document.getElementById('btnEmp').classList.add('has-charges'); else document.getElementById('btnEmp').classList.remove('has-charges');
-
-            if(isShieldActive) { document.getElementById('btnShield').style.borderColor = "#FFD166"; document.getElementById('btnShield').style.background = "rgba(255, 209, 102, 0.2)"; }
-            else { document.getElementById('btnShield').style.borderColor = "rgba(255, 234, 0, 0.4)"; document.getElementById('btnShield').style.background = "rgba(10, 12, 16, 0.9)"; }
-        }
-
-        function startGame() {
-            initAudio();
-            if(animationId) cancelAnimationFrame(animationId);
-            gameState = 'playing';
-            showScreen(''); screens.gameUI.style.display = 'block';
-            resize(); initLevel();
-            if(levelParamsCache.isBoss) playSound('boss');
-            
-            // SDK gameplay start
-            if (!gameplayActuallyStarted) {
-                crazyGameplayStart();
-                gameplayActuallyStarted = true;
-            }
-            
-            gameLoop();
-        }
-
-        function pauseGame() {
-            initAudio();
-            if(gameState !== 'playing') return;
-            gameState = 'paused';
-            
-            // SDK gameplay stop
-            if (gameplayActuallyStarted) {
-                crazyGameplayStop();
-                gameplayActuallyStarted = false;
-            }
-            
-            showScreen('pause');
-        }
-
-        function resumeGame() {
-            initAudio();
-            if (gameState === 'playing') return;
-
-            showScreen('');
-            screens.gameUI.style.display = 'block';
-
-            const cdScreen = document.getElementById('resumeCountdownScreen');
-            const cdNumber = document.getElementById('countdownNumber');
-            cdScreen.classList.add('active');
-
-            let count = 3;
-            cdNumber.innerText = count;
-
-            let interval = setInterval(() => {
-                count--;
-                if (count > 0) {
-                    cdNumber.innerText = count;
-                    playSound('hit');
-                } else {
-                    clearInterval(interval);
-                    cdScreen.classList.remove('active');
-                    gameState = 'playing';
-                    
-                    // SDK gameplay start
-                    if (!gameplayActuallyStarted) {
-                        crazyGameplayStart();
-                        gameplayActuallyStarted = true;
-                    }
-                    
-                    if(animationId) cancelAnimationFrame(animationId);
-                    gameLoop();
-                }
-            }, 1000);
-        }
-
-        function quickRestart() {
-            initAudio();
-            if(isSurvivalMode) { checkSurvivalAndStart(); } else { checkUnlocksAndStart(playingLevel); }
-        }
-
-        function levelComplete() {
-            if(isSurvivalMode) return;
-            playSound('win');
-            gameState = 'menu';
-
-            // Oyun döngüsünü kesinlikle durdur
-            if(animationId) { cancelAnimationFrame(animationId); animationId = null; }
-
-            // SDK gameplay stop
-            if (gameplayActuallyStarted) {
-                crazyGameplayStop();
-                gameplayActuallyStarted = false;
-            }
-            
-            crazyHappytime();
-
-            let baseReward = 10 + (playingLevel * 2);
-            let upgradeMult = 1.0 + (savedData.upgrades.coinMultiplier * 0.10);
-            let finalReward = Math.floor(baseReward * comboMultiplier * upgradeMult);
-            savedData.coins += finalReward;
-
-            if(playingLevel === savedData.maxLevelUnlocked) { savedData.maxLevelUnlocked++; }
-            playingLevel++; saveData();
-            document.getElementById('rewardCoins').innerText = "+" + finalReward + " 💰";
-            document.getElementById('comboBonusText').innerText = (comboMultiplier > 1.0 || upgradeMult > 1.0) ? `Bonus Active!` : "";
-
-            // 2x coin reward butonunu sıfırla
-            window.lastLevelReward = finalReward;
-            window.doubleCoinsClaimed = false;
-            const dblBtn = document.getElementById('doubleCoinsBtn');
-            if (dblBtn) {
-                dblBtn.style.opacity = "1";
-                dblBtn.style.pointerEvents = "auto";
-                dblBtn.innerText = "Watch Ad → 2x Coins 📺";
-            }
-
-            // Önce ekranı göster — kullanıcı ödülünü görsün
-            showScreen('complete');
-
-            // Reklam SADECE her 3 levelde bir (cooldown kontrolü zaten var)
-            levelCompleteCount++;
-            if (levelCompleteCount % 3 === 0) {
-                // 1.5 saniye bekle ki kullanıcı önce ödülü görsün, sonra reklam
-                setTimeout(() => {
-                    crazyMidgameAd(() => { /* reklam bittikten sonra zaten complete ekranındayız */ });
-                }, 1500);
-            }
-        }
-
-        function gameOver() {
-            playSound('error');
-            gameState = 'menu';
-
-            // Oyun döngüsünü kesinlikle durdur
-            if(animationId) { cancelAnimationFrame(animationId); animationId = null; }
-
-            // SDK gameplay stop
-            if (gameplayActuallyStarted) {
-                crazyGameplayStop();
-                gameplayActuallyStarted = false;
-            }
-
-            if(isSurvivalMode) {
-                if(collectedHp > savedData.highScoreSurvival) {
-                    savedData.highScoreSurvival = collectedHp;
-                    saveData();
-                }
-                if (collectedHp > 0) {
-                    addToLocalLeaderboard(collectedHp);
-                }
-                document.getElementById('failStats').innerHTML = `
-                    <div style="color: #8b949e; margin-bottom:10px;">Mode: <strong style="color: #aa00ff;">Survival</strong></div>
-                    <div style="color: #8b949e;">Your Score: <strong style="color: #00f3ff; font-size: 24px;">${collectedHp}</strong></div>
-                    <div style="color: #8b949e; font-size: 12px; margin-top:5px;">Best: ${savedData.highScoreSurvival}</div>
-                `;
-            } else {
-                document.getElementById('failStats').innerHTML = `<div style="color: #8b949e;">Core Leaked: <strong style="color: #EF476F; font-size: 22px;">${totalTargetHp - collectedHp}</strong></div>`;
-            }
-
-            // ÖNEMLİ: Reklam YOK — kullanıcı revive butonunu görsün, sinir olmasın
-            // Reklam sadece quickRestart veya menüye dönüşte gelebilir (cooldown'a bağlı)
-            showScreen('gameOver');
-
-            let currentReviveCost = 25 * Math.pow(2, sessionReviveCount);
-            const reviveBtn = document.getElementById('reviveBtn');
-            reviveBtn.innerText = `Revive (${currentReviveCost} 💰)`;
-
-            if(savedData.coins >= currentReviveCost) {
-                reviveBtn.style.opacity = "1"; reviveBtn.style.pointerEvents = "auto";
-            } else {
-                reviveBtn.style.opacity = "0.5"; reviveBtn.style.pointerEvents = "none";
-            }
-
-            const adBtn = document.getElementById('reviveAdBtn');
-            if (hasUsedAdRevive) {
-                adBtn.style.opacity = "0.4"; adBtn.innerText = "Ad Revive Used"; adBtn.style.pointerEvents = "none";
-            } else {
-                adBtn.style.opacity = "1"; adBtn.innerText = "Watch Ad to Revive 📺"; adBtn.style.pointerEvents = "auto";
-            }
-        }
-
-        function revive(isFree = false) {
-            initAudio();
-            let currentReviveCost = 25 * Math.pow(2, sessionReviveCount);
-            if(isFree) { hasUsedAdRevive = true; }
-
-            if(isFree || savedData.coins >= currentReviveCost) {
-                if(!isFree) savedData.coins -= currentReviveCost;
-                sessionReviveCount++;
-                saveData();
-                balls = []; frameCount = -30; combo = 0; updateComboUI();
-                showScreen(''); screens.gameUI.style.display = 'block';
-                gameState = 'playing';
-                
-                // SDK gameplay start (yeniden)
-                if (!gameplayActuallyStarted) {
-                    crazyGameplayStart();
-                    gameplayActuallyStarted = true;
-                }
-                
-                if(animationId) cancelAnimationFrame(animationId);
-                gameLoop(); updateGameUI();
-            }
-        }
-
-        function checkSurvivalAndStart() {
-            currentPalette = CLASSIC_PALETTE;
-            isSurvivalMode = true; playingLevel = 1; survivalLastScore = 0; sessionReviveCount = 0;
-
-            updateQuest('survival', 1);
-
-            startGame();
-        }
-
-        function spawnBall() {
-            if(rings.length === 0) return;
-
-            let availableRings = [...rings];
-            if (consecutiveColorCount >= 2 && rings.length > 1) {
-                let filtered = availableRings.filter(r => r.color !== lastSpawnedColor);
-                if (filtered.length > 0) availableRings = filtered;
-            }
-
-            let targetRing = availableRings[Math.floor(Math.random() * availableRings.length)];
-            if (targetRing.color === lastSpawnedColor) consecutiveColorCount++; else { lastSpawnedColor = targetRing.color; consecutiveColorCount = 1; }
-
-            let angle = Math.random() * Math.PI * 2;
-            let w = canvas.width / 2; let h = canvas.height * 0.42;
-            let absCos = Math.abs(Math.cos(angle)); let absSin = Math.abs(Math.sin(angle));
-            let distX = w / (absCos < 0.0001 ? 0.0001 : absCos); let distY = h / (absSin < 0.0001 ? 0.0001 : absSin);
-
-            let startDist = Math.min(distX, distY) + 15;
-            let baseDist = Math.min(canvas.width, canvas.height) / 2;
-
-            let targetFrames = baseDist / currentDynamicSpeed;
-            let assignedSpeed = startDist / targetFrames;
-            let spdMult = assignedSpeed / currentDynamicSpeed;
-
-            let r = Math.random(); let type = 'normal';
-
-            if (r < levelParamsCache.typeChances.rainbow) { type = 'rainbow'; }
-            else if (r < levelParamsCache.typeChances.rainbow + levelParamsCache.typeChances.phantom) { type = 'phantom'; }
-            else if (r < levelParamsCache.typeChances.rainbow + levelParamsCache.typeChances.phantom + levelParamsCache.typeChances.ninja) { type = 'ninja'; }
-            else if (r < levelParamsCache.typeChances.rainbow + levelParamsCache.typeChances.phantom + levelParamsCache.typeChances.ninja + levelParamsCache.typeChances.zigzag) { type = 'zigzag'; }
-
-            levelSpawnCount++;
-            if (playingLevel === 1) {
-                let tutCy = canvas.height * 0.42 - 80;
-                if (levelSpawnCount === 1) { createFloatingText(canvas.width/2, tutCy, "TAP ANYWHERE TO ROTATE!", "#00f3ff"); }
-                else if (levelSpawnCount === 4) { type = 'rainbow'; createFloatingText(canvas.width/2, tutCy, "RAINBOW MATCHES ANY COLOR!", "#FFD166"); }
-                else if (levelSpawnCount === 6) { createFloatingText(canvas.width/2, tutCy, "TRY USING POWER-UPS BELOW!", "#EF476F"); }
-            }
-
-            balls.push({ distance: startDist, angle: angle, renderX: 0, renderY: 0, radius: type==='ninja' ? 4 : 5, color: targetRing.color, type: type, toBeDeleted: false, travelDist: 0, speedMultiplier: spdMult });
-        }
-
-        function createParticles(x, y, color, isBig = false, isCrit = false) {
-            let count = isBig ? 30 : (isCrit ? 20 : 10); let speedMax = isBig ? 15 : (isCrit ? 10 : 6);
-            for(let i=0; i<count; i++) {
-                let angle = Math.random() * Math.PI * 2; let speed = (Math.random() * speedMax) + 2;
-                particles.push({ x: x, y: y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, life: 1.0, color: color, size: Math.random() * 4 + 2, isLine: Math.random() > 0.4 });
-            }
-            if (particles.length > 150) particles.splice(0, particles.length - 150);
-        }
-        function createRipple(x, y, color) { ripples.push({x: x, y: y, radius: 10, color: color, life: 1.0}); }
-        function createFloatingText(x, y, text, color) { floatingTexts.push({ x: x, y: y, text: text, color: color, life: 1.0, vy: -2 }); }
-
-        function handleInput(e) {
-            initAudio(); if (gameState !== 'playing') return;
-            if (e.target.closest('button') || e.target.closest('#powerupBar')) return;
-            e.preventDefault();
-            if(rings.length > 1) { let outermost = rings.pop(); rings.unshift(outermost); if(savedData.vibrationEnabled && navigator.vibrate) navigator.vibrate(10); }
-        }
-        window.addEventListener('pointerdown', handleInput, {passive: false});
-
-        document.getElementById('enterMapBtn').onclick = () => { initAudio(); openMapSmoothly();};
-        document.getElementById('survivalModeBtn').onclick = () => { initAudio(); checkSurvivalAndStart(); };
-
-        document.getElementById('openLeaderboardBtn').onclick = () => { initAudio(); showScreen('leaderboard'); loadLocalLeaderboard(); };
-        document.getElementById('lbToMenuBtn').onclick = () => { initAudio(); showScreen('welcome'); };
-        document.getElementById('globalLbBtn').onclick = () => { initAudio(); showGlobalLeaderboard(); };
-
-        document.getElementById('mapToMenuBtn').onclick = () => { initAudio(); showScreen('welcome'); };
-        document.getElementById('goShopBtn').onclick = () => { initAudio(); generateShop(); showScreen('shop'); };
-
-        document.getElementById('closeShopBtn').onclick = () => { initAudio(); openMapSmoothly(); };
-        document.getElementById('shopToMenuBtn').onclick = () => { initAudio(); showScreen('welcome'); };
-
-        document.getElementById('pauseBtn').onclick = pauseGame;
-        document.getElementById('resumeBtn').onclick = resumeGame;
-        document.getElementById('quickRestartBtnPause').onclick = quickRestart;
-        document.getElementById('pauseToMenuBtn').onclick = () => { initAudio(); showScreen('welcome'); };
-
-        document.getElementById('nextLevelBtn').onclick = () => { initAudio(); checkUnlocksAndStart(playingLevel); };
-        document.getElementById('hubReturnBtn').onclick = () => { initAudio(); openMapSmoothly(); };
-        document.getElementById('completeToMenuBtn').onclick = () => { initAudio(); showScreen('welcome'); };
-
-        document.getElementById('quickRestartBtn').onclick = quickRestart;
-        document.getElementById('reviveBtn').onclick = () => revive(false);
-        document.getElementById('reviveAdBtn').onclick = () => {
-            crazyGameplayStop();
-            crazyRewardedAd(() => {
-                revive(true);
-            }, () => {
-                showNotification("Ad not available", "#EF476F", "#ff0055");
-            });
-        };
-        document.getElementById('failHubBtn').onclick = () => { initAudio(); openMapSmoothly(); };
-        document.getElementById('failToMenuBtn').onclick = () => { initAudio(); showScreen('welcome'); };
-
-        document.getElementById('btnSlowMo').onclick = (e) => { e.preventDefault(); e.stopPropagation(); initAudio(); if(savedData.inventory.slowMo > 0 && !isSlowMoActive) { savedData.inventory.slowMo--; saveData(); isSlowMoActive = true; slowMoTimer = 360; playSound('boss'); updateGameUI(); updateQuest('powerup', 1); } else if(savedData.inventory.slowMo <= 0) { playSound('error'); } };
-        document.getElementById('btnShield').onclick = (e) => { e.preventDefault(); e.stopPropagation(); initAudio(); if(savedData.inventory.shield > 0 && !isShieldActive) { savedData.inventory.shield--; saveData(); isShieldActive = true; playSound('win'); updateGameUI(); updateQuest('powerup', 1); } else if(savedData.inventory.shield <= 0) { playSound('error'); } };
-        document.getElementById('btnEmp').onclick = (e) => {
-            e.preventDefault(); e.stopPropagation(); initAudio();
-            if(savedData.inventory.emp > 0) {
-                savedData.inventory.emp--; saveData(); updateQuest('powerup', 1);
-                screenShake = 30; playSound('boss');
-                balls.forEach(b => { createParticles(b.renderX, b.renderY, b.color, false, true); b.toBeDeleted = true; });
-                let targetCy = canvas.height * 0.42;
-                createRipple(canvas.width/2, targetCy, '#EF476F');
-                createFloatingText(canvas.width/2, targetCy - 80, "EMP DEPLOYED!", "#EF476F");
-                updateGameUI();
-            } else { playSound('error'); }
-        };
-
-        let time = 0;
-
-        function gameLoop() {
-            if (gameState !== 'playing') return;
-            time += 0.04;
-
-            let progressRatio = totalTargetHp > 0 ? (collectedHp / totalTargetHp) : 0;
-            let dynamicSpawnRate = levelParamsCache.spawnRate;
-
-            if (isSurvivalMode) {
-                let phaseProgress = (collectedHp % 10) / 10;
-                currentDynamicSpeed = levelParamsCache.speed * (1 + phaseProgress * 0.08);
-                let currentPhase = Math.floor(collectedHp / 10);
-                if (currentPhase > 0 && currentPhase > survivalLastScore) {
-                    survivalLastScore = currentPhase; let oldRingCount = levelParamsCache.ringCount;
-                    playingLevel++; calculateLevelParams(playingLevel);
-                    if (levelParamsCache.ringCount > oldRingCount) {
-                        let tutCy = canvas.height * 0.42 - 60;
-                        createFloatingText(canvas.width/2, tutCy, `${levelParamsCache.ringCount} COLORS ACTIVE!`, "#00f3ff");
-                        playSound('win');
-                    }
-                }
-
-                if(rings.length < levelParamsCache.ringCount) {
-                    let activeColors = rings.map(r => r.color);
-                    let availableColors = currentPalette.filter(c => !activeColors.includes(c));
-                    if (availableColors.length === 0) availableColors = currentPalette;
-                    let col = availableColors[Math.floor(Math.random() * availableColors.length)];
-                    addRingToGame(col, 10, rings.length % 2 === 0 ? 1 : -1);
-                }
-            } else {
-                if(rings.length === 0) {
-                    balls = [];
-                    levelComplete();
-                    return;
-                }
-                currentDynamicSpeed = levelParamsCache.speed * (1 + progressRatio * 0.4);
-                dynamicSpawnRate = Math.max(25, levelParamsCache.spawnRate * (1 - progressRatio * 0.35));
-            }
-
-            ctx.fillStyle = `rgba(10, 12, 16, 0.7)`;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            drawAmbientDust();
-
-            let cx = canvas.width / 2; let cy = canvas.height * 0.42;
-
-            if (combo >= 5) {
-                if(Math.random() < 0.2) warpLines.push({ angle: Math.random() * Math.PI*2, dist: BASE_RADIUS + 35, speed: 8 + Math.random()*5, life: 1 });
-                ctx.save(); ctx.translate(cx, cy);
-                for(let i=warpLines.length-1; i>=0; i--) {
-                    let wl = warpLines[i]; wl.dist += wl.speed; wl.speed *= 1.05; wl.life -= 0.02;
-                    if(wl.life <= 0 || wl.dist > canvas.width) { warpLines.splice(i,1); continue; }
-                    ctx.beginPath(); ctx.moveTo(Math.cos(wl.angle) * wl.dist, Math.sin(wl.angle) * wl.dist);
-                    ctx.lineTo(Math.cos(wl.angle) * (wl.dist + 40), Math.sin(wl.angle) * (wl.dist + 40));
-                    ctx.strokeStyle = isOverdrive ? `rgba(239, 71, 111, ${wl.life * 0.5})` : `rgba(0, 243, 255, ${wl.life * 0.4})`;
-                    ctx.lineWidth = 2; ctx.stroke();
-                }
-                ctx.restore();
-            }
-
-            ctx.save();
-            if (screenShake > 0) { ctx.translate((Math.random() - 0.5) * screenShake, (Math.random() - 0.5) * screenShake); screenShake -= 1.5; if(screenShake < 0) screenShake = 0; }
-
-            if(levelParamsCache.isBoss && !isSlowMoActive) { bossMechanicTimer++; if(bossMechanicTimer > 250) { bossMechanicTimer = 0; screenShake = 10; playSound('error'); createParticles(cx, cy, '#EF476F', true); rings.forEach(r => r.rotationDir *= -1); } }
-
-            if(rings.length > 0) {
-                frameCount++;
-                if (frameCount >= dynamicSpawnRate) { spawnBall(); frameCount = 0; }
-            }
-
-            for(let i=0; i<rings.length; i++) {
-                let ring = rings[i]; let currentRadius = BASE_RADIUS + RING_START_GAP + (i * RING_SPACING);
-                let rotation = time * (levelParamsCache.isBoss ? 0.8 : 0.4) * ring.rotationDir;
-                let numSegments = ring.maxHp; let anglePerSegment = (Math.PI * 2) / numSegments; let gapAngle = 0.08;
-
-                if (isOverdrive && !isSlowMoActive) rotation *= 1.3;
-
-                for(let s=0; s<numSegments; s++) {
-                    let seg = ring.segments[s];
-                    if(!seg.isAlive) continue;
-
-                    let startAngle = s * anglePerSegment + gapAngle + rotation; let endAngle = (s+1) * anglePerSegment - gapAngle + rotation;
-
-                    if (savedData.activeRingSkin === 'Classic') {
-                        ctx.beginPath(); ctx.arc(cx, cy, currentRadius, startAngle, endAngle); ctx.lineCap = 'round';
-                        ctx.shadowBlur = 10; ctx.shadowColor = ring.color; ctx.lineWidth = RING_THICKNESS; ctx.strokeStyle = ring.color; ctx.stroke();
-                        ctx.lineWidth = 2; ctx.strokeStyle = '#ffffff'; ctx.globalAlpha = 0.8; ctx.stroke(); ctx.globalAlpha = 1.0; ctx.shadowBlur = 0;
-                    }
-                    else if (savedData.activeRingSkin === 'Cyber') {
-                        ctx.beginPath(); ctx.arc(cx, cy, currentRadius, startAngle, endAngle); ctx.lineCap = 'butt'; ctx.setLineDash([15, 10]);
-                        ctx.shadowBlur = 15; ctx.shadowColor = ring.color; ctx.lineWidth = RING_THICKNESS + 2; ctx.strokeStyle = ring.color; ctx.stroke();
-                        ctx.setLineDash([]); ctx.globalAlpha = 1.0; ctx.shadowBlur = 0;
-                    }
-                    else if (savedData.activeRingSkin === 'Blade') {
-                        ctx.beginPath(); ctx.arc(cx, cy, currentRadius, startAngle, endAngle); ctx.lineCap = 'square';
-                        ctx.shadowBlur = 10; ctx.shadowColor = ring.color; ctx.lineWidth = RING_THICKNESS; ctx.strokeStyle = ring.color; ctx.stroke();
-                        ctx.beginPath(); ctx.arc(cx, cy, currentRadius + 4, startAngle, endAngle);
-                        ctx.setLineDash([4, 8]); ctx.lineWidth = 3; ctx.strokeStyle = '#ffffff'; ctx.globalAlpha = 0.8; ctx.stroke();
-                        ctx.setLineDash([]); ctx.globalAlpha = 1.0; ctx.shadowBlur = 0;
-                    }
-                    else if (savedData.activeRingSkin === 'Dragon') {
-                        ctx.beginPath(); ctx.arc(cx, cy, currentRadius, startAngle, endAngle); ctx.lineCap = 'round';
-                        ctx.shadowBlur = 15; ctx.shadowColor = ring.color; ctx.lineWidth = RING_THICKNESS; ctx.strokeStyle = ring.color; ctx.stroke();
-                        let headAngle = ring.rotationDir > 0 ? endAngle : startAngle;
-                        ctx.beginPath(); ctx.arc(cx + Math.cos(headAngle)*currentRadius, cy + Math.sin(headAngle)*currentRadius, RING_THICKNESS * 1.5, 0, Math.PI*2);
-                        ctx.fillStyle = ring.color; ctx.fill();
-                        ctx.beginPath(); ctx.arc(cx + Math.cos(headAngle)*currentRadius, cy + Math.sin(headAngle)*currentRadius, RING_THICKNESS * 0.7, 0, Math.PI*2);
-                        ctx.fillStyle = '#ffffff'; ctx.fill(); ctx.shadowBlur = 0;
-                    }
-                    else if (savedData.activeRingSkin === 'Plasma') {
-                        let pulse = Math.sin(time * 8 + i) * 3;
-                        ctx.beginPath(); ctx.arc(cx, cy, currentRadius, startAngle, endAngle); ctx.lineCap = 'round';
-                        ctx.shadowBlur = 20; ctx.shadowColor = ring.color; ctx.lineWidth = RING_THICKNESS + pulse; ctx.strokeStyle = ring.color; ctx.stroke();
-                        ctx.lineWidth = 1; ctx.strokeStyle = '#ffffff'; ctx.globalAlpha = 0.6; ctx.stroke(); ctx.globalAlpha = 1.0; ctx.shadowBlur = 0;
-                    }
-                    else if (savedData.activeRingSkin === 'Orbit') {
-                        ctx.beginPath(); ctx.arc(cx, cy, currentRadius, startAngle, endAngle); ctx.lineCap = 'round';
-                        ctx.shadowBlur = 10; ctx.shadowColor = ring.color; ctx.lineWidth = 3; ctx.strokeStyle = ring.color; ctx.stroke();
-                        ctx.beginPath(); ctx.arc(cx + Math.cos(startAngle)*currentRadius, cy + Math.sin(startAngle)*currentRadius, RING_THICKNESS, 0, Math.PI*2);
-                        ctx.fillStyle = '#ffffff'; ctx.fill();
-                        ctx.beginPath(); ctx.arc(cx + Math.cos(endAngle)*currentRadius, cy + Math.sin(endAngle)*currentRadius, RING_THICKNESS, 0, Math.PI*2);
-                        ctx.fillStyle = '#ffffff'; ctx.fill(); ctx.shadowBlur = 0;
-                    }
-
-                    if (seg.type === 'armor') {
-                        ctx.beginPath(); ctx.arc(cx, cy, currentRadius, startAngle, endAngle);
-                        ctx.lineWidth = RING_THICKNESS; ctx.strokeStyle = seg.hp === 2 ? '#C0C0C0' : '#8b949e'; ctx.stroke();
-                    } else if (seg.type === 'bomb') {
-                        let midAngle = (startAngle + endAngle) / 2;
-                        ctx.beginPath(); ctx.arc(cx + Math.cos(midAngle)*currentRadius, cy + Math.sin(midAngle)*currentRadius, RING_THICKNESS * 0.8, 0, Math.PI*2);
-                        ctx.fillStyle = '#EF476F'; ctx.fill();
-                    }
-                }
-                ctx.beginPath(); ctx.arc(cx, cy, currentRadius, 0, Math.PI*2); ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.stroke();
-            }
-
-            let corePulse = Math.sin(time * 3) * 1.5; let baseR = BASE_RADIUS + corePulse;
-            ctx.save(); ctx.translate(cx, cy);
-
-            if (isOverdrive || levelParamsCache.isBoss) {
-                ctx.fillStyle = '#EF476F'; ctx.shadowColor = '#ff0055'; ctx.shadowBlur = 35; ctx.beginPath(); ctx.arc(0, 0, baseR, 0, Math.PI * 2); ctx.fill();
-            } else {
-                let skin = savedData.activeCoreSkin;
-                if (skin === 'Pure White') {
-                    ctx.fillStyle = '#ffffff'; ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 25; ctx.beginPath(); ctx.arc(0, 0, baseR, 0, Math.PI * 2); ctx.fill();
-                } else if (skin === 'Crimson Eye') {
-                    ctx.fillStyle = '#111'; ctx.shadowColor = '#EF476F'; ctx.shadowBlur = 20; ctx.beginPath(); ctx.arc(0, 0, baseR, 0, Math.PI * 2); ctx.fill();
-                    ctx.fillStyle = '#EF476F'; ctx.beginPath(); ctx.arc(0, 0, baseR * 0.4, 0, Math.PI * 2); ctx.fill();
-                } else if (skin === 'Abyss') {
-                    ctx.fillStyle = '#0a0c10'; ctx.shadowColor = '#aa00ff'; ctx.shadowBlur = 30; ctx.beginPath(); ctx.arc(0, 0, baseR, 0, Math.PI * 2); ctx.fill();
-                    ctx.strokeStyle = '#aa00ff'; ctx.lineWidth = 2; ctx.stroke();
-                } else if (skin === 'Neon Pulse') {
-                    ctx.fillStyle = `hsl(${(time * 100) % 360}, 100%, 60%)`; ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 25; ctx.beginPath(); ctx.arc(0, 0, baseR, 0, Math.PI * 2); ctx.fill();
-                } else if (skin === 'Golden Star') {
-                    ctx.fillStyle = '#FFD166'; ctx.shadowColor = '#ff9800'; ctx.shadowBlur = 25; ctx.beginPath();
-                    for(let i=0; i<5; i++) { ctx.lineTo(Math.cos((18 + i*72)/180*Math.PI)*baseR, -Math.sin((18 + i*72)/180*Math.PI)*baseR); ctx.lineTo(Math.cos((54 + i*72)/180*Math.PI)*baseR*0.4, -Math.sin((54 + i*72)/180*Math.PI)*baseR*0.4); }
-                    ctx.closePath(); ctx.fill();
-                }
-            }
-            ctx.restore(); ctx.shadowBlur = 0;
-
-            if (laserCharges > 0) {
-                ctx.font = "bold 14px 'Orbitron', sans-serif";
-                ctx.fillStyle = "#EF476F";
-                ctx.shadowColor = "#EF476F";
-                ctx.shadowBlur = 10;
-                ctx.textAlign = "center";
-                let chargeText = "⚡".repeat(laserCharges);
-                ctx.fillText(chargeText + " LASER " + chargeText, cx, cy + BASE_RADIUS + 40);
-                ctx.shadowBlur = 0;
-            }
-
-            if(isShieldActive && rings.length > 0) {
-                let outerRadius = BASE_RADIUS + RING_START_GAP + ((rings.length-1) * RING_SPACING) + 12; ctx.beginPath(); ctx.arc(cx, cy, outerRadius, 0, Math.PI * 2);
-                ctx.strokeStyle = 'rgba(255, 209, 102, 0.8)'; ctx.lineWidth = 3; ctx.setLineDash([10, 15]); ctx.lineDashOffset = -time * 15; ctx.stroke(); ctx.setLineDash([]);
-            }
-
-            if (isSlowMoActive) {
-                ctx.fillStyle = 'rgba(0, 243, 255, 0.05)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-                slowMoTimer--; if (slowMoTimer <= 0) { isSlowMoActive = false; updateGameUI(); }
-            }
-
-            for (let i = balls.length - 1; i >= 0; i--) {
-                let b = balls[i]; if(b.toBeDeleted) continue;
-
-                let bSpeed = currentDynamicSpeed * b.speedMultiplier;
-                if (isSlowMoActive) { bSpeed *= 0.35; }
-
-                if(b.type === 'ninja') { if(b.distance < Math.min(canvas.width, canvas.height)/2.5) bSpeed *= 2.2; }
-
-                b.distance -= bSpeed;
-                b.travelDist += bSpeed;
-
-                b.renderX = cx + Math.cos(b.angle) * b.distance;
-                b.renderY = cy + Math.sin(b.angle) * b.distance;
-
-                if(b.type === 'zigzag') {
-                    let wave = Math.sin(b.travelDist * 0.08) * 20; b.renderX += Math.cos(b.angle + Math.PI/2) * wave; b.renderY += Math.sin(b.angle + Math.PI/2) * wave;
-                }
-
-                if(b.type === 'rainbow') b.color = `hsl(${(time * 200) % 360}, 100%, 60%)`;
-
-                let dist = Math.hypot(b.renderX - cx, b.renderY - cy);
-                let outerRingIndex = rings.length - 1;
-                let outerRadius = BASE_RADIUS + RING_START_GAP + (outerRingIndex * RING_SPACING) + (RING_THICKNESS/2);
-
-                if (dist <= outerRadius + b.radius && rings.length > 0) {
-                    let hitRing = rings[outerRingIndex];
-
-                    if (b.type === 'rainbow' || hitRing.color === b.color) {
-
-                        let isCrit = (combo > 5); screenShake = isCrit ? 12 : 6;
-                        if(savedData.vibrationEnabled && navigator.vibrate) navigator.vibrate(isCrit ? 25 : 15);
-
-                        playSound('hit', combo); combo++; updateComboUI();
-
-                        let aliveIndexes = []; hitRing.segments.forEach((seg, idx) => { if(seg.isAlive) aliveIndexes.push(idx); });
-                        if(aliveIndexes.length > 0) {
-                            let randomIdx = aliveIndexes[Math.floor(Math.random() * aliveIndexes.length)];
-                            let hitSeg = hitRing.segments[randomIdx];
-
-                            hitSeg.hp--;
-                            hitRing.hp--;
-                            collectedHp++;
-
-                            if(hitSeg.hp <= 0) {
-                                hitSeg.isAlive = false;
-
-                                if(hitSeg.type === 'bomb') {
-                                    let leftIdx = (randomIdx - 1 + hitRing.maxHp) % hitRing.maxHp;
-                                    let rightIdx = (randomIdx + 1) % hitRing.maxHp;
-
-                                    [leftIdx, rightIdx].forEach(adjIdx => {
-                                        let adjSeg = hitRing.segments[adjIdx];
-                                        if(adjSeg.isAlive) {
-                                            adjSeg.isAlive = false;
-                                            let dmg = adjSeg.hp;
-                                            hitRing.hp -= dmg;
-                                            collectedHp += dmg;
-                                            adjSeg.hp = 0;
-
-                                        let aAngle = adjIdx * ((Math.PI * 2) / hitRing.maxHp) + (time * (levelParamsCache.isBoss ? 0.8 : 0.4) * hitRing.rotationDir);
-                                        let pX = cx + Math.cos(aAngle) * outerRadius; let pY = cy + Math.sin(aAngle) * outerRadius;
-                                        createParticles(pX, pY, '#EF476F', true);
-                                        }
-                                    });
-                                    screenShake += 10;
-                                    playSound('boss');
-                                }
-                            }
-                        }
-
-                        if (collectedHp > 0 && collectedHp % 20 === 0) {
-                            laserCharges = 2;
-                            createFloatingText(cx, cy - 80, "LASER SHIELD ACTIVE!", "#EF476F");
-                            playSound('win');
-                        }
-
-                        if (isOverdrive && isSurvivalMode) collectedHp++;
-
-                        if (combo === 3) createFloatingText(b.renderX, b.renderY - 20, "NICE!", "#00ff88");
-                        if (combo === 6) createFloatingText(b.renderX, b.renderY - 20, "GREAT!", "#00f3ff");
-                        if (combo === 10) createFloatingText(b.renderX, b.renderY - 20, "FLAWLESS!", "#ffea00");
-
-                        createParticles(b.renderX, b.renderY, b.color, false, isCrit); createRipple(b.renderX, b.renderY, b.color); b.toBeDeleted = true; updateGameUI();
-
-                        if(hitRing.hp <= 0) {
-                            screenShake = 20;
-                            if(savedData.vibrationEnabled && navigator.vibrate) navigator.vibrate([30, 40, 30]);
-                            createParticles(cx, cy, hitRing.color, true); createFloatingText(cx, cy - 40, "SHATTERED!", hitRing.color); createRipple(cx, cy, hitRing.color); rings.pop();
-
-                            updateQuest('shatter', 1);
-                            crazyHappytime();
-
-                            balls.forEach(ball => {
-                                if(ball.color === hitRing.color && ball.type !== 'rainbow') {
-                                    createParticles(ball.renderX, ball.renderY, ball.color, false);
-                                    ball.toBeDeleted = true;
-                                }
-                            });
-                        }
-                    } else {
-                        if (laserCharges > 0) {
-                            laserCharges--;
-                            screenShake = 15;
-                            playSound('hit');
-
-                            ctx.save();
-                            ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(b.renderX, b.renderY);
-                            ctx.strokeStyle = '#EF476F'; ctx.lineWidth = 4; ctx.setLineDash([5, 5]); ctx.stroke();
-                            ctx.restore();
-
-                            createParticles(b.renderX, b.renderY, '#EF476F', false, true);
-                            b.toBeDeleted = true;
-                            createFloatingText(b.renderX, b.renderY - 20, "LASER DEFENSE! (" + laserCharges + ")", "#EF476F");
-
-                            combo = 0; updateComboUI();
-                        } else {
-                            screenShake = 12;
-                            if(savedData.vibrationEnabled && navigator.vibrate) navigator.vibrate(40);
-                            playSound('error'); combo = 0; updateComboUI();
-                            if(isShieldActive) { isShieldActive = false; createParticles(b.renderX, b.renderY, '#FFD166', true); b.toBeDeleted = true; updateGameUI(); }
-                            else { ctx.restore(); gameOver(); return; }
-                        }
-                    }
-                    continue;
-                }
-
-                if (b.type === 'phantom') { ctx.globalAlpha = Math.max(0.1, Math.abs(Math.sin(time * 8 + b.distance * 0.05))); }
-
-                ctx.beginPath(); ctx.arc(b.renderX, b.renderY, b.radius, 0, Math.PI * 2);
-                ctx.fillStyle = b.color; ctx.shadowBlur = 8; ctx.shadowColor = b.color; ctx.fill(); ctx.shadowBlur = 0;
-
-                ctx.lineWidth = 1.5;
-                ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
-                ctx.stroke();
-
-                ctx.globalAlpha = 1.0;
-            }
-
-            balls = balls.filter(b => !b.toBeDeleted);
-            for(let i=ripples.length-1; i>=0; i--) { let r = ripples[i]; r.radius += 4; r.life -= 0.05; if(r.life <= 0) { ripples.splice(i,1); continue; } ctx.beginPath(); ctx.arc(r.x, r.y, r.radius, 0, Math.PI*2); ctx.strokeStyle = r.color; ctx.globalAlpha = r.life; ctx.lineWidth = 2; ctx.stroke(); ctx.globalAlpha = 1.0; }
-
-            for (let i = particles.length - 1; i >= 0; i--) {
-                let p = particles[i]; p.x += p.vx; p.y += p.vy; p.life -= 0.04;
-                if(p.life <= 0) { particles.splice(i, 1); continue; }
-                ctx.globalAlpha = p.life;
-                if (p.isLine) { ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - p.vx*2, p.y - p.vy*2); ctx.strokeStyle = p.color; ctx.lineWidth = p.size; ctx.stroke(); }
-                else { ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fillStyle = p.color; ctx.fill(); }
-                ctx.globalAlpha = 1.0;
-            }
-
-            for (let i = floatingTexts.length - 1; i >= 0; i--) {
-                let ft = floatingTexts[i]; ft.y += ft.vy; ft.life -= 0.02;
-                if (ft.life <= 0) { floatingTexts.splice(i, 1); continue; }
-                ctx.globalAlpha = Math.max(0, ft.life); ctx.font = "bold 20px 'Orbitron', sans-serif"; ctx.fillStyle = ft.color; ctx.textAlign = "center"; ctx.shadowBlur = 10; ctx.shadowColor = ft.color;
-                let scale = 1 + (1 - ft.life) * 0.5; ctx.save(); ctx.translate(ft.x, ft.y); ctx.scale(scale, scale); ctx.fillText(ft.text, 0, 0); ctx.restore(); ctx.globalAlpha = 1.0; ctx.shadowBlur = 0;
-            }
-
             ctx.restore(); animationId = requestAnimationFrame(gameLoop);
         }
     </script>
