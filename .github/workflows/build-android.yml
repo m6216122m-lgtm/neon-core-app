@@ -1,4 +1,4 @@
-name: Build Android APK & AAB
+Name: Build Android APK & AAB
 
 on:
   workflow_dispatch:
@@ -36,6 +36,22 @@ jobs:
 
       - name: Sync Capacitor
         run: npx cap sync android
+
+      - name: Update Target SDK to 35
+        run: |
+          VARIABLES_FILE="android/variables.gradle"
+          if [ -f "$VARIABLES_FILE" ]; then
+            sed -i "s/targetSdkVersion = .*/targetSdkVersion = 35/" $VARIABLES_FILE
+            sed -i "s/compileSdkVersion = .*/compileSdkVersion = 35/" $VARIABLES_FILE
+            echo "✓ variables.gradle güncellendi: SDK 35"
+          else
+            BUILD_GRADLE="android/app/build.gradle"
+            if [ -f "$BUILD_GRADLE" ]; then
+              sed -i "s/targetSdk .*/targetSdk 35/" $BUILD_GRADLE
+              sed -i "s/compileSdk .*/compileSdk 35/" $BUILD_GRADLE
+              echo "✓ build.gradle güncellendi: SDK 35"
+            fi
+          fi
 
       - name: Inject AdMob App ID into AndroidManifest
         run: |
