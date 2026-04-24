@@ -446,19 +446,8 @@
                 AdMob.addListener('rewardedVideoAdDismissed', () => {
                     rewardedLoaded = false;
                     muteGameAudio(false);
-                    AdMob.prepareRewardVideoAd({ adId: ADMOB_CONFIG.rewardedId }).catch(e => console.error("re-prepare rewarded:", e));
-                    if (window._rewardEarned && window._pendingRewardCb) {
-                        const cb = window._pendingRewardCb;
-                        window._pendingRewardCb = null;
-                        window._pendingRewardFailCb = null;
-                        window._rewardEarned = false;
-                        cb();
-                    } else if (window._pendingRewardFailCb) {
-                        const cb = window._pendingRewardFailCb;
-                        window._pendingRewardCb = null;
-                        window._pendingRewardFailCb = null;
-                        cb();
-                    }
+                    // NOT: Callback çağırmıyoruz - crazyRewardedAd()'deki await bunu zaten hallediyor
+                    // Sadece state temizliği yapıyoruz
                 });
 
                 admobReady = true;
@@ -540,17 +529,38 @@
                     await window.AdMobPlugin.prepareRewardVideoAd({ adId: ADMOB_CONFIG.rewardedId });
                     rewardedLoaded = true;
                 }
+
                 muteGameAudio(true);
                 window._rewardEarned = false;
-                window._pendingRewardCb = onSuccess;
-                window._pendingRewardFailCb = onFail;
-                await window.AdMobPlugin.showRewardVideoAd();
+
+                // ÇİFT GÜVENCE: Hem event listener hem promise return değeri
+                // Modern plugin'de showRewardVideoAd() reward objesi döner
+                const result = await window.AdMobPlugin.showRewardVideoAd();
+                console.log("[AdMob] showRewardVideoAd result:", JSON.stringify(result));
+
+                muteGameAudio(false);
+                rewardedLoaded = false;
+
+                // Bir sonraki reklamı arkaplanda hazırla
+                window.AdMobPlugin.prepareRewardVideoAd({ adId: ADMOB_CONFIG.rewardedId })
+                    .catch(e => console.log("re-prepare rewarded:", e));
+
+                // Ödül alındı mı? Event listener'dan VEYA promise result'undan
+                const gotReward = window._rewardEarned ||
+                                  (result && (result.type || result.amount || result.rewarded === true));
+                window._rewardEarned = false;
+
+                if (gotReward) {
+                    console.log("✓ Reward VERİLDİ");
+                    if (onSuccess) onSuccess();
+                } else {
+                    console.log("✗ Kullanıcı reklamı erken kapattı - ödül yok");
+                    if (onFail) onFail();
+                }
             } catch (e) {
-                console.log("[AdMob] Rewarded error:", e);
+                console.log("[AdMob] Rewarded error:", e.message || JSON.stringify(e));
                 rewardedLoaded = false;
                 muteGameAudio(false);
-                window._pendingRewardCb = null;
-                window._pendingRewardFailCb = null;
                 if (onFail) onFail();
             }
         }
@@ -1581,12 +1591,10 @@
             showScreen('complete');
 
             // Reklam SADECE her 3 levelde bir (cooldown kontrolü zaten var)
+            // setTimeout YOK - kullanıcı oyuna geri dönmeden reklam gelsin
             levelCompleteCount++;
             if (levelCompleteCount % 3 === 0) {
-                // 1.5 saniye bekle ki kullanıcı önce ödülü görsün, sonra reklam
-                setTimeout(() => {
-                    crazyMidgameAd(() => { /* reklam bittikten sonra zaten complete ekranındayız */ });
-                }, 1500);
+                crazyMidgameAd(() => { /* reklam bittikten sonra zaten complete ekranındayız */ });
             }
         }
 
@@ -1644,11 +1652,9 @@
                 adBtn.style.opacity = "1"; adBtn.innerText = "Watch Ad to Revive 📺"; adBtn.style.pointerEvents = "auto";
             }
 
-            // Her 3 yanışta reklam - UI geldikten 1.5 saniye sonra, cooldown kontrolü zaten var
+            // Her 3 yanışta reklam - HEMEN gelsin, setTimeout yok
             if (shouldShowAd) {
-                setTimeout(() => {
-                    crazyMidgameAd(() => { /* reklam bitti, ekran zaten görünüyor */ });
-                }, 1500);
+                crazyMidgameAd(() => { /* reklam bitti, ekran zaten görünüyor */ });
             }
         }
 
@@ -1771,11 +1777,17 @@
         document.getElementById('quickRestartBtn').onclick = quickRestart;
         document.getElementById('reviveBtn').onclick = () => revive(false);
         document.getElementById('reviveAdBtn').onclick = () => {
+            initAudio();
             crazyGameplayStop();
+            const adBtn = document.getElementById('reviveAdBtn');
+            adBtn.style.pointerEvents = "none";
+            adBtn.innerText = "Reklam yükleniyor...";
             crazyRewardedAd(() => {
                 revive(true);
             }, () => {
-                showNotification("Ad not available", "#EF476F", "#ff0055");
+                adBtn.style.pointerEvents = "auto";
+                adBtn.innerText = "Watch Ad to Revive 📺";
+                showNotification("Reklam şu an hazır değil", "#EF476F", "#ff0055");
             });
         };
         document.getElementById('failHubBtn').onclick = () => { initAudio(); openMapSmoothly(); };
