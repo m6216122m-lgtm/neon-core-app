@@ -348,7 +348,7 @@
 
         // Reklam frekans kontrolü - kullanıcı deneyimi için
         let lastAdTimestamp = 0;
-        const AD_COOLDOWN_MS = 90000; // 90 saniye (AdMob için biraz daha agresif olabilir)
+        const AD_COOLDOWN_MS = 120000; // 2 dakika - kullanıcıyı sinir etmeyelim
 
         function canShowAd() {
             return (Date.now() - lastAdTimestamp) >= AD_COOLDOWN_MS;
@@ -1533,7 +1533,10 @@
             if(isSurvivalMode) return;
             playSound('win');
             gameState = 'menu';
-            
+
+            // Oyun döngüsünü kesinlikle durdur
+            if(animationId) { cancelAnimationFrame(animationId); animationId = null; }
+
             // SDK gameplay stop
             if (gameplayActuallyStarted) {
                 crazyGameplayStop();
@@ -1562,16 +1565,26 @@
                 dblBtn.innerText = "Watch Ad → 2x Coins 📺";
             }
 
-            // Her level sonu interstitial dene - cooldown otomatik düzenler
-            crazyMidgameAd(() => {
-                showScreen('complete');
-            });
+            // Önce ekranı göster — kullanıcı ödülünü görsün
+            showScreen('complete');
+
+            // Reklam SADECE her 3 levelde bir (cooldown kontrolü zaten var)
+            levelCompleteCount++;
+            if (levelCompleteCount % 3 === 0) {
+                // 1.5 saniye bekle ki kullanıcı önce ödülü görsün, sonra reklam
+                setTimeout(() => {
+                    crazyMidgameAd(() => { /* reklam bittikten sonra zaten complete ekranındayız */ });
+                }, 1500);
+            }
         }
 
         function gameOver() {
             playSound('error');
             gameState = 'menu';
-            
+
+            // Oyun döngüsünü kesinlikle durdur
+            if(animationId) { cancelAnimationFrame(animationId); animationId = null; }
+
             // SDK gameplay stop
             if (gameplayActuallyStarted) {
                 crazyGameplayStop();
@@ -1595,27 +1608,26 @@
                 document.getElementById('failStats').innerHTML = `<div style="color: #8b949e;">Core Leaked: <strong style="color: #EF476F; font-size: 22px;">${totalTargetHp - collectedHp}</strong></div>`;
             }
 
-            // Game over'da midgame ad
-            crazyMidgameAd(() => {
-                showScreen('gameOver');
+            // ÖNEMLİ: Reklam YOK — kullanıcı revive butonunu görsün, sinir olmasın
+            // Reklam sadece quickRestart veya menüye dönüşte gelebilir (cooldown'a bağlı)
+            showScreen('gameOver');
 
-                let currentReviveCost = 25 * Math.pow(2, sessionReviveCount);
-                const reviveBtn = document.getElementById('reviveBtn');
-                reviveBtn.innerText = `Revive (${currentReviveCost} 💰)`;
+            let currentReviveCost = 25 * Math.pow(2, sessionReviveCount);
+            const reviveBtn = document.getElementById('reviveBtn');
+            reviveBtn.innerText = `Revive (${currentReviveCost} 💰)`;
 
-                if(savedData.coins >= currentReviveCost) {
-                    reviveBtn.style.opacity = "1"; reviveBtn.style.pointerEvents = "auto";
-                } else {
-                    reviveBtn.style.opacity = "0.5"; reviveBtn.style.pointerEvents = "none";
-                }
+            if(savedData.coins >= currentReviveCost) {
+                reviveBtn.style.opacity = "1"; reviveBtn.style.pointerEvents = "auto";
+            } else {
+                reviveBtn.style.opacity = "0.5"; reviveBtn.style.pointerEvents = "none";
+            }
 
-                const adBtn = document.getElementById('reviveAdBtn');
-                if (hasUsedAdRevive) {
-                    adBtn.style.opacity = "0.4"; adBtn.innerText = "Ad Revive Used"; adBtn.style.pointerEvents = "none";
-                } else {
-                    adBtn.style.opacity = "1"; adBtn.innerText = "Watch Ad to Revive 📺"; adBtn.style.pointerEvents = "auto";
-                }
-            });
+            const adBtn = document.getElementById('reviveAdBtn');
+            if (hasUsedAdRevive) {
+                adBtn.style.opacity = "0.4"; adBtn.innerText = "Ad Revive Used"; adBtn.style.pointerEvents = "none";
+            } else {
+                adBtn.style.opacity = "1"; adBtn.innerText = "Watch Ad to Revive 📺"; adBtn.style.pointerEvents = "auto";
+            }
         }
 
         function revive(isFree = false) {
