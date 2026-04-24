@@ -494,7 +494,7 @@
         function crazyLoadingStart() { /* no-op */ }
         function crazyLoadingStop() { /* no-op */ }
 
-// ========== INTERSTITIAL (Midgame) Reklam ==========
+        // ========== INTERSTITIAL (Midgame) Reklam ==========
         async function crazyMidgameAd(callback) {
             if (!canShowAd()) {
                 if (callback) callback(false);
@@ -506,13 +506,12 @@
                 return;
             }
             try {
-                // KRİTİK DÜZELTME: Hazır değilse zorla yükle
+                // Hazır değilse zorla yüklemeyi dene
                 if (!interstitialLoaded) {
                     console.log("[AdMob] Interstitial forced load attempt...");
                     await window.AdMobPlugin.prepareInterstitial({ adId: ADMOB_CONFIG.interstitialId });
                     interstitialLoaded = true;
                 }
-
                 muteGameAudio(true);
                 window._pendingInterstitialCb = (success) => {
                     if (callback) callback(success);
@@ -535,13 +534,12 @@
                 return;
             }
             try {
-                // KRİTİK DÜZELTME: Eğer reklam arkaplanda yüklenemediyse, butona basıldığında zorla yüklemeyi dene
+                // Hazır değilse zorla yüklemeyi dene
                 if (!rewardedLoaded) {
                     console.log("[AdMob] Rewarded forced load attempt...");
                     await window.AdMobPlugin.prepareRewardVideoAd({ adId: ADMOB_CONFIG.rewardedId });
                     rewardedLoaded = true;
                 }
-
                 muteGameAudio(true);
                 window._rewardEarned = false;
                 window._pendingRewardCb = onSuccess;
@@ -553,34 +551,6 @@
                 muteGameAudio(false);
                 window._pendingRewardCb = null;
                 window._pendingRewardFailCb = null;
-                if (onFail) onFail();
-            }
-        }
-            try {
-                // KRİTİK DÜZELTME: Eğer reklam arkaplanda yüklenemediyse, butona basıldığında zorla yüklemeyi dene
-                if (!rewardedLoaded) {
-                    console.log("[AdMob] Rewarded forced load attempt...");
-                    await window.AdMobPlugin.prepareRewardVideoAd({ adId: ADMOB_CONFIG.rewardedId });
-                    rewardedLoaded = true;
-                }
-
-                muteGameAudio(true);
-                window._rewardEarned = false;
-                window._pendingRewardCb = onSuccess;
-                window._pendingRewardFailCb = onFail;
-                await window.AdMobPlugin.showRewardVideoAd();
-            } catch (e) {
-                console.log("[AdMob] Rewarded error:", e);
-                rewardedLoaded = false;
-                muteGameAudio(false);
-                window._pendingRewardCb = null;
-                window._pendingRewardFailCb = null;
-                if (onFail) onFail();
-            }
-        } else {
-                // Rewarded hazır değilse, kullanıcıya test modu ödülü verme!
-                // Bunun yerine fail et ki kullanıcı tekrar denesin
-                console.log("[AdMob] Rewarded not ready - telling user to retry");
                 if (onFail) onFail();
             }
         }
@@ -1136,7 +1106,7 @@
         let laserCharges = 0;
 
         let levelCompleteCount = 0;
-        let gameOverCount = 0; // YENİ: Yanma sayısını takip eden değişken
+        let gameOverCount = 0; // Yanma sayısını takip et
 
         window.watchAdForShop = function(itemId, type, requiredAds) {
             initAudio();
@@ -1633,15 +1603,9 @@
                 gameplayActuallyStarted = false;
             }
 
-            // --- YENİ EKLENEN KISIM: Her 3 yanışta reklam kontrolü ---
+            // Her 3 yanışta reklam göster (sadece ad-revive kullanılmadıysa)
             gameOverCount++;
-            // Eğer kullanıcı bu elde reklam izleyerek canlanmadıysa ve 3. yanışsa reklam göster.
-            if (gameOverCount % 3 === 0 && !hasUsedAdRevive) {
-                setTimeout(() => {
-                    crazyMidgameAd();
-                }, 1200); // UI ekrana geldikten 1.2 saniye sonra reklam çıksın
-            }
-            // -----------------------------------------------------------
+            const shouldShowAd = (gameOverCount % 3 === 0) && !hasUsedAdRevive;
 
             if(isSurvivalMode) {
                 if(collectedHp > savedData.highScoreSurvival) {
@@ -1660,6 +1624,7 @@
                 document.getElementById('failStats').innerHTML = `<div style="color: #8b949e;">Core Leaked: <strong style="color: #EF476F; font-size: 22px;">${totalTargetHp - collectedHp}</strong></div>`;
             }
 
+            // Önce ekranı göster — kullanıcı revive butonunu hemen görsün
             showScreen('gameOver');
 
             let currentReviveCost = 25 * Math.pow(2, sessionReviveCount);
@@ -1677,6 +1642,13 @@
                 adBtn.style.opacity = "0.4"; adBtn.innerText = "Ad Revive Used"; adBtn.style.pointerEvents = "none";
             } else {
                 adBtn.style.opacity = "1"; adBtn.innerText = "Watch Ad to Revive 📺"; adBtn.style.pointerEvents = "auto";
+            }
+
+            // Her 3 yanışta reklam - UI geldikten 1.5 saniye sonra, cooldown kontrolü zaten var
+            if (shouldShowAd) {
+                setTimeout(() => {
+                    crazyMidgameAd(() => { /* reklam bitti, ekran zaten görünüyor */ });
+                }, 1500);
             }
         }
 
