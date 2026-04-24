@@ -494,7 +494,6 @@
         function crazyLoadingStart() { /* no-op */ }
         function crazyLoadingStop() { /* no-op */ }
 
-        // ========== INTERSTITIAL (Midgame) Reklam ==========
 // ========== INTERSTITIAL (Midgame) Reklam ==========
         async function crazyMidgameAd(callback) {
             if (!canShowAd()) {
@@ -527,21 +526,36 @@
                 if (callback) callback(false);
             }
         }
-            } else {
-                // Hazır değilse skip - kullanıcı deneyimini bozma
-                console.log("[AdMob] Interstitial not ready, skipping");
-                if (callback) callback(false);
-            }
-        }
 
         // ========== REWARDED (Ödüllü) Reklam ==========
-// ========== REWARDED (Ödüllü) Reklam ==========
         async function crazyRewardedAd(onSuccess, onFail) {
             if (!admobReady || !window.AdMobPlugin) {
                 console.log("[AdMob] Plugin not ready - telling user to retry");
                 if (onFail) onFail();
                 return;
             }
+            try {
+                // KRİTİK DÜZELTME: Eğer reklam arkaplanda yüklenemediyse, butona basıldığında zorla yüklemeyi dene
+                if (!rewardedLoaded) {
+                    console.log("[AdMob] Rewarded forced load attempt...");
+                    await window.AdMobPlugin.prepareRewardVideoAd({ adId: ADMOB_CONFIG.rewardedId });
+                    rewardedLoaded = true;
+                }
+
+                muteGameAudio(true);
+                window._rewardEarned = false;
+                window._pendingRewardCb = onSuccess;
+                window._pendingRewardFailCb = onFail;
+                await window.AdMobPlugin.showRewardVideoAd();
+            } catch (e) {
+                console.log("[AdMob] Rewarded error:", e);
+                rewardedLoaded = false;
+                muteGameAudio(false);
+                window._pendingRewardCb = null;
+                window._pendingRewardFailCb = null;
+                if (onFail) onFail();
+            }
+        }
             try {
                 // KRİTİK DÜZELTME: Eğer reklam arkaplanda yüklenemediyse, butona basıldığında zorla yüklemeyi dene
                 if (!rewardedLoaded) {
