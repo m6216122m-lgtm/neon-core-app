@@ -1,0 +1,35 @@
+name: Extract Upload Certificate
+
+on:
+  workflow_dispatch:
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Decode Keystore and Extract PEM
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          # 1. Keystore'u Base64'ten normal dosyaya çevir
+          echo "$KEYSTORE_BASE64" | base64 -d > release.jks
+          
+          # 2. Keytool kullanarak PEM sertifikasını çıkar
+          keytool -export -rfc -alias "$KEY_ALIAS" -file upload_certificate.pem -keystore release.jks -storepass "$KEYSTORE_PASSWORD"
+          
+          echo "✓ Sertifika başarıyla çıkarıldı!"
+
+      - name: Upload PEM as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: upload_certificate
+          path: upload_certificate.pem
+          retention-days: 1
