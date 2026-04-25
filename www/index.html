@@ -839,9 +839,8 @@
         // =========================================================
         // GOOGLE PLAY GAMES SERVICES (Global Leaderboard)
         // =========================================================
-        // Plugin: @openforge/capacitor-game-connect (Capacitor 6 için legacy-peer-deps gerekir)
-        // package.json'a "@openforge/capacitor-game-connect": "^5.0.2" ekle
-        // Devre dışı bırakmak için config.js'de playGames.enabled = false yap
+        // ŞU AN DEVRE DIŞI - Yarın Play Games kurulumu sonrası eklenecek
+        // Plugin: @openforge/capacitor-game-connect (sonra eklenecek)
 
         let playGamesReady = false;
         let playGamesSignedIn = false;
@@ -857,15 +856,14 @@
                     console.log("[PlayGames] Native platform değil");
                     return;
                 }
-                // @openforge/capacitor-game-connect: Plugin adı CapacitorGameConnect
+                // Plugin yüklü mü kontrol et - yoksa sessizce çık (crash olmasın)
                 const GameConnect = Capacitor.Plugins.CapacitorGameConnect;
                 if (!GameConnect) {
-                    console.log("[PlayGames] Game Connect plugin bulunamadı");
+                    console.log("[PlayGames] Game Connect plugin henüz kurulu değil - skipping");
                     return;
                 }
                 window.GameConnectPlugin = GameConnect;
 
-                // signIn() Google Play Games hesabıyla giriş yapar
                 await GameConnect.signIn();
                 playGamesSignedIn = true;
                 playGamesReady = true;
@@ -880,7 +878,6 @@
             if (!playGamesReady || !playGamesSignedIn || !PLAY_GAMES_CONFIG.leaderboardId) return;
             if (!window.GameConnectPlugin) return;
             try {
-                // Game Connect API: submitScore({ leaderboardID, score })
                 await window.GameConnectPlugin.submitScore({
                     leaderboardID: PLAY_GAMES_CONFIG.leaderboardId,
                     score: score
@@ -891,13 +888,12 @@
             }
         }
 
-        // Native leaderboard ekranını aç (Google'ın kendi UI'ı)
+        // Native leaderboard ekranını aç
         async function showGlobalLeaderboard() {
             if (!PLAY_GAMES_CONFIG.enabled) {
-                showNotification("Global leaderboard not enabled", "#EF476F", "#ff0055");
+                showNotification("Global leaderboard yakında!", "#4285F4", "#34A853");
                 return;
             }
-            // Eğer henüz sign-in olmamışsa, tekrar dene
             if (!playGamesReady) {
                 showNotification("Connecting to Google Play Games...", "#4285F4", "#34A853");
                 await initPlayGames();
@@ -906,16 +902,11 @@
                     return;
                 }
             }
-            if (!PLAY_GAMES_CONFIG.leaderboardId) {
-                showNotification("Leaderboard ID not configured", "#EF476F", "#ff0055");
-                return;
-            }
             if (!window.GameConnectPlugin) {
                 showNotification("Play Games plugin not installed", "#EF476F", "#ff0055");
                 return;
             }
             try {
-                // Game Connect API: showLeaderboard({ leaderboardID })
                 await window.GameConnectPlugin.showLeaderboard({
                     leaderboardID: PLAY_GAMES_CONFIG.leaderboardId
                 });
@@ -925,10 +916,9 @@
             }
         }
 
-        // App ready olduğunda Play Games'i de başlat
+        // App ready olduğunda Play Games'i de başlat (eğer plugin varsa)
         document.addEventListener('deviceready', initPlayGames, false);
-        // Capacitor'da deviceready bazen gec gelir - 3sn sonra da dene
-        setTimeout(() => { if (!playGamesReady) initPlayGames(); }, 3000);
+        setTimeout(() => { if (!playGamesReady && PLAY_GAMES_CONFIG.enabled) initPlayGames(); }, 3000);
 
 
         // =========================================================
