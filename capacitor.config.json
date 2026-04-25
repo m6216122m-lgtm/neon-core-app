@@ -2,8 +2,10 @@
   "appId": "com.krosss.neoncorearcade",
   "appName": "Neon Core",
   "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
   "android": {
-    "versionCode": 6,
-    "versionName": "1.0.5"
+    "allowMixedContent": false
   }
 }
