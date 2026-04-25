@@ -666,8 +666,8 @@
         // =========================================================
         // GOOGLE PLAY IN-APP REVIEW (Rate App Popup)
         // =========================================================
-        // Plugin: @capacitor-community/in-app-review
-        // package.json'a "@capacitor-community/in-app-review": "^1.0.0" ekle
+        // Plugin: @capawesome/capacitor-app-review (Capacitor 6 uyumlu)
+        // package.json'a "@capawesome/capacitor-app-review": "^6.0.0" ekle
         // Native Play Store dialog'u açar, kullanıcı uygulamadan çıkmadan rate verebilir
 
         async function showRateAppDialog() {
@@ -677,13 +677,14 @@
                     console.log("[Review] Native platform değil");
                     return false;
                 }
-                const InAppReview = Capacitor.Plugins.InAppReview;
-                if (!InAppReview) {
+                // @capawesome/capacitor-app-review kullanır AppReview ismini
+                const AppReview = Capacitor.Plugins.AppReview;
+                if (!AppReview) {
                     console.log("[Review] Plugin yok");
                     return false;
                 }
                 console.log("[Review] Showing native rate dialog...");
-                await InAppReview.requestReview();
+                await AppReview.requestReview();
                 console.log("[Review] Dialog gösterildi");
 
                 // Google'ın garantisi yok, gösterip göstermediğini bilemiyoruz
@@ -838,7 +839,8 @@
         // =========================================================
         // GOOGLE PLAY GAMES SERVICES (Global Leaderboard)
         // =========================================================
-        // Plugin: cordova-plugin-play-games-services-fix VEYA @capacitor-community/play-games
+        // Plugin: @openforge/capacitor-game-connect (Capacitor 6 için legacy-peer-deps gerekir)
+        // package.json'a "@openforge/capacitor-game-connect": "^5.0.2" ekle
         // Devre dışı bırakmak için config.js'de playGames.enabled = false yap
 
         let playGamesReady = false;
@@ -850,49 +852,42 @@
                 return;
             }
             try {
-                // Cordova plugin (cordova-plugin-play-games-services-fix)
-                if (typeof window.playGamesServices !== 'undefined') {
-                    await new Promise((resolve, reject) => {
-                        window.playGamesServices.auth(resolve, reject);
-                    });
-                    playGamesSignedIn = true;
-                    playGamesReady = true;
-                    console.log("[PlayGames] Signed in via Cordova");
+                const Capacitor = window.Capacitor;
+                if (!Capacitor || !Capacitor.isNativePlatform || !Capacitor.isNativePlatform()) {
+                    console.log("[PlayGames] Native platform değil");
+                    return;
                 }
-                // Capacitor plugin (@openforge/capacitor-play-games)
-                else if (typeof window.PlayGames !== 'undefined') {
-                    await window.PlayGames.signIn();
-                    playGamesSignedIn = true;
-                    playGamesReady = true;
-                    console.log("[PlayGames] Signed in via Capacitor");
-                } else {
-                    console.log("[PlayGames] Plugin bulunamadı - sadece local leaderboard");
+                // @openforge/capacitor-game-connect: Plugin adı CapacitorGameConnect
+                const GameConnect = Capacitor.Plugins.CapacitorGameConnect;
+                if (!GameConnect) {
+                    console.log("[PlayGames] Game Connect plugin bulunamadı");
+                    return;
                 }
+                window.GameConnectPlugin = GameConnect;
+
+                // signIn() Google Play Games hesabıyla giriş yapar
+                await GameConnect.signIn();
+                playGamesSignedIn = true;
+                playGamesReady = true;
+                console.log("[PlayGames] Signed in via Game Connect");
             } catch(e) {
-                console.log("[PlayGames] Sign-in error:", e);
+                console.log("[PlayGames] Sign-in error:", e.message || JSON.stringify(e));
             }
         }
 
         // Skoru global leaderboard'a gönder
         async function submitGlobalScore(score) {
             if (!playGamesReady || !playGamesSignedIn || !PLAY_GAMES_CONFIG.leaderboardId) return;
+            if (!window.GameConnectPlugin) return;
             try {
-                if (typeof window.playGamesServices !== 'undefined') {
-                    window.playGamesServices.submitScore({
-                        score: score,
-                        leaderboardId: PLAY_GAMES_CONFIG.leaderboardId
-                    }, () => console.log("[PlayGames] Score submitted:", score),
-                       (e) => console.log("[PlayGames] Submit error:", e));
-                }
-                else if (typeof window.PlayGames !== 'undefined') {
-                    await window.PlayGames.submitScore({
-                        leaderboardId: PLAY_GAMES_CONFIG.leaderboardId,
-                        score: score
-                    });
-                    console.log("[PlayGames] Score submitted:", score);
-                }
+                // Game Connect API: submitScore({ leaderboardID, score })
+                await window.GameConnectPlugin.submitScore({
+                    leaderboardID: PLAY_GAMES_CONFIG.leaderboardId,
+                    score: score
+                });
+                console.log("[PlayGames] Score submitted:", score);
             } catch(e) {
-                console.log("[PlayGames] Submit error:", e);
+                console.log("[PlayGames] Submit error:", e.message || JSON.stringify(e));
             }
         }
 
@@ -902,8 +897,8 @@
                 showNotification("Global leaderboard not enabled", "#EF476F", "#ff0055");
                 return;
             }
-            if (!playGamesReady || !PLAY_GAMES_CONFIG.leaderboardId) {
-                // Play Games hazır değilse tekrar sign-in dene
+            // Eğer henüz sign-in olmamışsa, tekrar dene
+            if (!playGamesReady) {
                 showNotification("Connecting to Google Play Games...", "#4285F4", "#34A853");
                 await initPlayGames();
                 if (!playGamesReady) {
@@ -911,27 +906,29 @@
                     return;
                 }
             }
+            if (!PLAY_GAMES_CONFIG.leaderboardId) {
+                showNotification("Leaderboard ID not configured", "#EF476F", "#ff0055");
+                return;
+            }
+            if (!window.GameConnectPlugin) {
+                showNotification("Play Games plugin not installed", "#EF476F", "#ff0055");
+                return;
+            }
             try {
-                if (typeof window.playGamesServices !== 'undefined') {
-                    window.playGamesServices.showLeaderboard({
-                        leaderboardId: PLAY_GAMES_CONFIG.leaderboardId
-                    });
-                }
-                else if (typeof window.PlayGames !== 'undefined') {
-                    await window.PlayGames.showLeaderboard({
-                        leaderboardId: PLAY_GAMES_CONFIG.leaderboardId
-                    });
-                } else {
-                    showNotification("Play Games plugin not installed", "#EF476F", "#ff0055");
-                }
+                // Game Connect API: showLeaderboard({ leaderboardID })
+                await window.GameConnectPlugin.showLeaderboard({
+                    leaderboardID: PLAY_GAMES_CONFIG.leaderboardId
+                });
             } catch(e) {
-                console.log("[PlayGames] Show leaderboard error:", e);
+                console.log("[PlayGames] Show leaderboard error:", e.message || JSON.stringify(e));
                 showNotification("Could not open leaderboard", "#EF476F", "#ff0055");
             }
         }
 
         // App ready olduğunda Play Games'i de başlat
         document.addEventListener('deviceready', initPlayGames, false);
+        // Capacitor'da deviceready bazen gec gelir - 3sn sonra da dene
+        setTimeout(() => { if (!playGamesReady) initPlayGames(); }, 3000);
 
 
         // =========================================================
