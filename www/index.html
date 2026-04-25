@@ -163,6 +163,53 @@
         }
         #userInfo img { width: 24px; height: 24px; border-radius: 50%; }
         #userInfo span { font-size: 12px; color: #00f3ff; font-family: 'Orbitron', sans-serif; }
+
+        /* TUTORIAL - Yarı saydam beyaz el */
+        #tutorialOverlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 50; display: none;
+        }
+        #tutorialOverlay.active { display: block; }
+        #tutorialHand {
+            position: absolute;
+            width: 60px; height: 60px;
+            font-size: 50px;
+            color: rgba(255, 255, 255, 0.85);
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.9), 0 0 40px rgba(0, 243, 255, 0.6);
+            transform: translate(-50%, -50%);
+            transition: top 0.6s cubic-bezier(0.4, 0, 0.2, 1), left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center; line-height: 60px;
+            filter: drop-shadow(0 0 15px rgba(255,255,255,0.7));
+        }
+        #tutorialHand.tap-anim {
+            animation: tutorialTap 0.4s ease-out;
+        }
+        @keyframes tutorialTap {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(0.7); color: rgba(0, 243, 255, 1); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+        #tutorialHint {
+            position: absolute;
+            bottom: 30%; left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 243, 255, 0.15);
+            border: 1px solid rgba(0, 243, 255, 0.5);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.4);
+            white-space: nowrap;
+            animation: tutorialHintPulse 1.5s ease-in-out infinite;
+        }
+        @keyframes tutorialHintPulse {
+            0%, 100% { opacity: 0.85; }
+            50% { opacity: 1; box-shadow: 0 0 40px rgba(0, 243, 255, 0.8); }
+        }
     </style>
 </head>
 <body>
@@ -242,7 +289,7 @@
         <div class="box" id="leaderboardList" style="width: 300px; max-height: 50vh; overflow-y: auto; padding: 10px;">
         </div>
         <div style="color: #8b949e; font-size: 11px; margin-bottom: 15px; padding: 0 20px;">Local scores on this device</div>
-        <button class="action-btn" id="globalLbBtn" style="background: linear-gradient(45deg, #4285F4, #34A853); color: white; margin-bottom: 8px;">🌍 Global Leaderboard</button>
+        <button class="action-btn" id="globalLbBtn" style="background: linear-gradient(45deg, #4285F4, #34A853); color: white; margin-bottom: 8px;">🌍 Global Leaderboard (Play Games)</button>
         <button class="action-btn secondary" id="lbToMenuBtn">Main Menu</button>
     </div>
 
@@ -321,6 +368,12 @@
     </div>
 
     <canvas id="gameCanvas"></canvas>
+
+    <!-- TUTORIAL OVERLAY -->
+    <div id="tutorialOverlay">
+        <div id="tutorialHand">👆</div>
+        <div id="tutorialHint">Tap to rotate the rings!</div>
+    </div>
 
     <script>
         // =========================================================
@@ -611,6 +664,178 @@
         }
 
         // =========================================================
+        // GOOGLE PLAY IN-APP REVIEW (Rate App Popup)
+        // =========================================================
+        // Plugin: @capacitor-community/in-app-review
+        // package.json'a "@capacitor-community/in-app-review": "^1.0.0" ekle
+        // Native Play Store dialog'u açar, kullanıcı uygulamadan çıkmadan rate verebilir
+
+        async function showRateAppDialog() {
+            try {
+                const Capacitor = window.Capacitor;
+                if (!Capacitor || !Capacitor.isNativePlatform || !Capacitor.isNativePlatform()) {
+                    console.log("[Review] Native platform değil");
+                    return false;
+                }
+                const InAppReview = Capacitor.Plugins.InAppReview;
+                if (!InAppReview) {
+                    console.log("[Review] Plugin yok");
+                    return false;
+                }
+                console.log("[Review] Showing native rate dialog...");
+                await InAppReview.requestReview();
+                console.log("[Review] Dialog gösterildi");
+
+                // Google'ın garantisi yok, gösterip göstermediğini bilemiyoruz
+                // O yüzden 24 saat cooldown koyup tekrar denemeyelim
+                savedData.lastRatePromptTime = Date.now();
+                saveData();
+                return true;
+            } catch (e) {
+                console.log("[Review] Hata:", e.message || JSON.stringify(e));
+                return false;
+            }
+        }
+
+        // Rate prompt göstermenin uygun olup olmadığını kontrol et
+        function shouldShowRatePrompt() {
+            // Daha önce manuel "rated" demişse hiç gösterme
+            if (savedData.userRated) return false;
+
+            // 24 saat içinde gösterildi mi?
+            const now = Date.now();
+            const lastShown = savedData.lastRatePromptTime || 0;
+            const HOURS_24 = 24 * 60 * 60 * 1000;
+            if ((now - lastShown) < HOURS_24) return false;
+
+            return true;
+        }
+
+        // Counter artırıp belirli aralıklarda rate prompt tetikle
+        function triggerRatePromptIfReady(eventType) {
+            // eventType: 'levelComplete' veya 'survivalEnd'
+            if (!savedData.rateCounters) {
+                savedData.rateCounters = { levels: 0, survivals: 0 };
+            }
+
+            if (eventType === 'levelComplete') savedData.rateCounters.levels++;
+            else if (eventType === 'survivalEnd') savedData.rateCounters.survivals++;
+
+            saveData();
+
+            // 3 level VEYA 3 survival
+            const reachedLevels = savedData.rateCounters.levels > 0 && savedData.rateCounters.levels % 3 === 0;
+            const reachedSurvivals = savedData.rateCounters.survivals > 0 && savedData.rateCounters.survivals % 3 === 0;
+
+            if ((reachedLevels || reachedSurvivals) && shouldShowRatePrompt()) {
+                // 1 saniye bekle ki kullanıcı önce ekranı görsün
+                setTimeout(() => {
+                    showRateAppDialog();
+                }, 1000);
+            }
+        }
+
+        // =========================================================
+        // LOCAL NOTIFICATIONS (Push Bildirim - Backend'siz)
+        // =========================================================
+        // Plugin: @capacitor/local-notifications
+        // package.json'a "@capacitor/local-notifications": "^6.0.0" ekle
+        // Kullanıcı oyunu kapattıktan 8 ve 20 saat sonra hatırlatma gönderir
+
+        const NOTIFICATION_MESSAGES = [
+            { title: "🎮 Neon Core", body: "Daily reward seni bekliyor! 100 💰 hazır." },
+            { title: "🔥 Geri dön!", body: "Survival Mode'da yeni rekorunu kırmaya hazır mısın?" },
+            { title: "⚡ Neon Core", body: "Yeni layer'lar fethedilmeyi bekliyor!" },
+            { title: "💰 Free Coins!", body: "Reklam izleyerek bedava 100 coin kazan!" },
+            { title: "🏆 Hadi gel!", body: "Bugünkü daily quest'lerini tamamlamayı unutma." },
+            { title: "🚀 Neon Core", body: "Yeni skinler shop'ta seni bekliyor!" },
+            { title: "💎 Combo Master", body: "OVERDRIVE moduna ulaşmaya hazır mısın?" },
+            { title: "⏰ Neon Core", body: "Streak'in kırılmasın, hadi bir round!" },
+            { title: "🎯 Layer Bekliyor", body: "Bir sonraki boss'u yenebilir misin?" },
+            { title: "✨ Hey!", body: "Core sensiz sıkıldı, gel bir oyun çevirelim!" }
+        ];
+
+        // Random 2 farklı mesaj seç
+        function pickTwoRandomMessages() {
+            const shuffled = [...NOTIFICATION_MESSAGES].sort(() => Math.random() - 0.5);
+            return [shuffled[0], shuffled[1]];
+        }
+
+        async function scheduleLocalNotifications() {
+            try {
+                const Capacitor = window.Capacitor;
+                if (!Capacitor || !Capacitor.isNativePlatform || !Capacitor.isNativePlatform()) {
+                    console.log("[Notif] Native platform değil");
+                    return;
+                }
+                const LocalNotifications = Capacitor.Plugins.LocalNotifications;
+                if (!LocalNotifications) {
+                    console.log("[Notif] Plugin yok");
+                    return;
+                }
+
+                // İzin kontrolü ve isteme
+                const permResult = await LocalNotifications.checkPermissions();
+                if (permResult.display !== 'granted') {
+                    const reqResult = await LocalNotifications.requestPermissions();
+                    if (reqResult.display !== 'granted') {
+                        console.log("[Notif] İzin reddedildi");
+                        return;
+                    }
+                }
+
+                // Eski bildirimleri iptal et (kullanıcı oyunu açtığında zaten dönmüş demektir)
+                try {
+                    const pending = await LocalNotifications.getPending();
+                    if (pending.notifications && pending.notifications.length > 0) {
+                        await LocalNotifications.cancel({ notifications: pending.notifications });
+                        console.log("[Notif] Eski bildirimler iptal edildi:", pending.notifications.length);
+                    }
+                } catch(e) { console.log("[Notif] Cancel error:", e); }
+
+                // 8 ve 20 saat sonrası için 2 random mesaj
+                const messages = pickTwoRandomMessages();
+                const now = Date.now();
+                const HOUR = 60 * 60 * 1000;
+
+                await LocalNotifications.schedule({
+                    notifications: [
+                        {
+                            id: 1,
+                            title: messages[0].title,
+                            body: messages[0].body,
+                            schedule: { at: new Date(now + 8 * HOUR) },
+                            smallIcon: "ic_launcher"
+                        },
+                        {
+                            id: 2,
+                            title: messages[1].title,
+                            body: messages[1].body,
+                            schedule: { at: new Date(now + 20 * HOUR) },
+                            smallIcon: "ic_launcher"
+                        }
+                    ]
+                });
+                console.log("[Notif] 2 bildirim planlandı: 8h ve 20h sonra");
+            } catch (e) {
+                console.log("[Notif] Hata:", e.message || JSON.stringify(e));
+            }
+        }
+
+        // Uygulama açıldığında bildirimleri yenile
+        document.addEventListener('deviceready', () => {
+            // 2 saniye gecikme - app initialize bitsin
+            setTimeout(scheduleLocalNotifications, 2000);
+        }, false);
+
+        // Uygulama arka plana atılınca da yenile (kullanıcı oyunu kapattığında)
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                scheduleLocalNotifications();
+            }
+        });
+
+        // =========================================================
         // GOOGLE PLAY GAMES SERVICES (Global Leaderboard)
         // =========================================================
         // Plugin: cordova-plugin-play-games-services-fix VEYA @capacitor-community/play-games
@@ -673,9 +898,18 @@
 
         // Native leaderboard ekranını aç (Google'ın kendi UI'ı)
         async function showGlobalLeaderboard() {
-            if (!playGamesReady || !PLAY_GAMES_CONFIG.leaderboardId) {
-                showNotification("Global leaderboard not available", "#EF476F", "#ff0055");
+            if (!PLAY_GAMES_CONFIG.enabled) {
+                showNotification("Global leaderboard not enabled", "#EF476F", "#ff0055");
                 return;
+            }
+            if (!playGamesReady || !PLAY_GAMES_CONFIG.leaderboardId) {
+                // Play Games hazır değilse tekrar sign-in dene
+                showNotification("Connecting to Google Play Games...", "#4285F4", "#34A853");
+                await initPlayGames();
+                if (!playGamesReady) {
+                    showNotification("Sign in to Google Play Games first", "#EF476F", "#ff0055");
+                    return;
+                }
             }
             try {
                 if (typeof window.playGamesServices !== 'undefined') {
@@ -687,9 +921,12 @@
                     await window.PlayGames.showLeaderboard({
                         leaderboardId: PLAY_GAMES_CONFIG.leaderboardId
                     });
+                } else {
+                    showNotification("Play Games plugin not installed", "#EF476F", "#ff0055");
                 }
             } catch(e) {
                 console.log("[PlayGames] Show leaderboard error:", e);
+                showNotification("Could not open leaderboard", "#EF476F", "#ff0055");
             }
         }
 
@@ -1492,7 +1729,12 @@
                 crazyGameplayStart();
                 gameplayActuallyStarted = true;
             }
-            
+
+            // Tutorial gerekiyor mu?
+            if (shouldStartTutorial()) {
+                startTutorial();
+            }
+
             gameLoop();
         }
 
@@ -1596,6 +1838,9 @@
             if (levelCompleteCount % 3 === 0) {
                 crazyMidgameAd(() => { /* reklam bittikten sonra zaten complete ekranındayız */ });
             }
+
+            // RATE APP: Her 3 level tamamlandığında native dialog tetikle
+            triggerRatePromptIfReady('levelComplete');
         }
 
         function gameOver() {
@@ -1655,6 +1900,11 @@
             // Her 3 yanışta reklam - HEMEN gelsin, setTimeout yok
             if (shouldShowAd) {
                 crazyMidgameAd(() => { /* reklam bitti, ekran zaten görünüyor */ });
+            }
+
+            // RATE APP: Survival modda her 3 oyundan sonra
+            if (isSurvivalMode) {
+                triggerRatePromptIfReady('survivalEnd');
             }
         }
 
@@ -1747,6 +1997,8 @@
         function handleInput(e) {
             initAudio(); if (gameState !== 'playing') return;
             if (e.target.closest('button') || e.target.closest('#powerupBar')) return;
+            // Tutorial sırasında kullanıcı tıklamasını ignore et
+            if (tutorialActive) { e.preventDefault(); return; }
             e.preventDefault();
             if(rings.length > 1) { let outermost = rings.pop(); rings.unshift(outermost); if(savedData.vibrationEnabled && navigator.vibrate) navigator.vibrate(10); }
         }
@@ -1810,9 +2062,120 @@
 
         let time = 0;
 
+        // =========================================================
+        // TUTORIAL SİSTEMİ
+        // =========================================================
+        // İlk Level 1'e girildiğinde veya ilk Survival oyununda yarı saydam el
+        // otomatik olarak ilk 3 eşleşmeyi yapar, sonra kullanıcıya bırakır
+        let tutorialActive = false;
+        let tutorialStep = 0;
+        let tutorialAutoMatchesDone = 0;
+        const TUTORIAL_AUTO_MATCHES = 3;
+
+        function shouldStartTutorial() {
+            if (isSurvivalMode && !savedData.tutorialSurvivalDone) return true;
+            if (!isSurvivalMode && playingLevel === 1 && !savedData.tutorialCampaignDone) return true;
+            return false;
+        }
+
+        function startTutorial() {
+            tutorialActive = true;
+            tutorialStep = 0;
+            tutorialAutoMatchesDone = 0;
+            const overlay = document.getElementById('tutorialOverlay');
+            const hand = document.getElementById('tutorialHand');
+            const hint = document.getElementById('tutorialHint');
+            overlay.classList.add('active');
+
+            // İlk pozisyon: ekranın sağ alt köşesi
+            hand.style.left = (canvas.width * 0.7) + 'px';
+            hand.style.top = (canvas.height * 0.7) + 'px';
+            hint.innerText = isSurvivalMode ? "Watch the auto-play!" : "Match colors to shatter rings!";
+        }
+
+        function endTutorial() {
+            tutorialActive = false;
+            const overlay = document.getElementById('tutorialOverlay');
+            overlay.classList.remove('active');
+
+            // Flag kaydet
+            if (isSurvivalMode) savedData.tutorialSurvivalDone = true;
+            else savedData.tutorialCampaignDone = true;
+            saveData();
+
+            // Hint güncelle
+            const hint = document.getElementById('tutorialHint');
+            hint.innerText = "Now you try!";
+
+            // Mesaj 2 saniye sonra kaybolsun
+            const overlayEl = document.getElementById('tutorialOverlay');
+            overlayEl.classList.add('active');
+            setTimeout(() => {
+                overlayEl.classList.remove('active');
+            }, 2000);
+        }
+
+        // Otomatik el hareketi: balli'a yöneliyor ve "tıklıyor"
+        function moveTutorialHandToBall(targetBall) {
+            if (!tutorialActive) return;
+            const hand = document.getElementById('tutorialHand');
+            // Topa biraz altına yaklaşsın (sanki kullanıcı eli)
+            hand.style.left = targetBall.renderX + 'px';
+            hand.style.top = (targetBall.renderY + 30) + 'px';
+        }
+
+        function tutorialAutoTap() {
+            if (!tutorialActive) return;
+            const hand = document.getElementById('tutorialHand');
+            hand.classList.remove('tap-anim');
+            // CSS animation reset
+            void hand.offsetWidth;
+            hand.classList.add('tap-anim');
+        }
+
+        // En yakın topa eşleşmek için ring rotasyonu yap
+        function tutorialAutoRotate() {
+            if (!tutorialActive || balls.length === 0 || rings.length === 0) return;
+
+            // En yakın topu bul
+            let closestBall = null;
+            let closestDist = Infinity;
+            balls.forEach(b => {
+                if (b.toBeDeleted) return;
+                if (b.distance < closestDist) {
+                    closestDist = b.distance;
+                    closestBall = b;
+                }
+            });
+
+            if (!closestBall) return;
+
+            // Eli o topa yönlendir
+            moveTutorialHandToBall(closestBall);
+
+            // Top dış halkaya yakınsa ve renk eşleşmiyorsa rotate yap
+            const outerRing = rings[rings.length - 1];
+            if (closestBall.distance < 80 && closestBall.color !== outerRing.color && closestBall.type !== 'rainbow') {
+                // Doğru renkte olan ringi en dışa getirene kadar rotate
+                let attempts = 0;
+                while (rings[rings.length - 1].color !== closestBall.color && attempts < rings.length) {
+                    let outermost = rings.pop();
+                    rings.unshift(outermost);
+                    attempts++;
+                }
+                tutorialAutoTap();
+            }
+        }
+
+
         function gameLoop() {
             if (gameState !== 'playing') return;
             time += 0.04;
+
+            // Tutorial: otomatik el hareketi + ring rotasyonu
+            if (tutorialActive) {
+                tutorialAutoRotate();
+            }
 
             let progressRatio = totalTargetHp > 0 ? (collectedHp / totalTargetHp) : 0;
             let dynamicSpawnRate = levelParamsCache.spawnRate;
@@ -1844,6 +2207,37 @@
                     levelComplete();
                     return;
                 }
+
+                // MERCY CLEAR: Çok az segment kaldıysa kullanıcıyı bekletme, otomatik patlat
+                // %85 ilerleme + 3 veya daha az segment kalmışsa hepsini bir anda yok et
+                let totalAliveSegments = 0;
+                rings.forEach(r => {
+                    r.segments.forEach(s => { if(s.isAlive) totalAliveSegments++; });
+                });
+                if (progressRatio >= 0.85 && totalAliveSegments <= 3 && totalAliveSegments > 0) {
+                    let cxM = canvas.width / 2; let cyM = canvas.height * 0.42;
+                    rings.forEach(r => {
+                        r.segments.forEach(s => {
+                            if(s.isAlive) {
+                                s.isAlive = false;
+                                collectedHp += s.hp;
+                                s.hp = 0;
+                            }
+                        });
+                        // Halka tamamen kırıldı efekti
+                        createParticles(cxM, cyM, r.color, true);
+                        createRipple(cxM, cyM, r.color);
+                    });
+                    rings = [];
+                    balls = [];
+                    screenShake = 25;
+                    if(savedData.vibrationEnabled && navigator.vibrate) navigator.vibrate([30, 40, 60]);
+                    playSound('win');
+                    createFloatingText(cxM, cyM - 40, "PERFECT CLEAR!", "#FFD166");
+                    levelComplete();
+                    return;
+                }
+
                 currentDynamicSpeed = levelParamsCache.speed * (1 + progressRatio * 0.4);
                 dynamicSpawnRate = Math.max(25, levelParamsCache.spawnRate * (1 - progressRatio * 0.35));
             }
@@ -2024,6 +2418,14 @@
                         if(savedData.vibrationEnabled && navigator.vibrate) navigator.vibrate(isCrit ? 25 : 15);
 
                         playSound('hit', combo); combo++; updateComboUI();
+
+                        // Tutorial: eşleşme sayacını artır
+                        if (tutorialActive) {
+                            tutorialAutoMatchesDone++;
+                            if (tutorialAutoMatchesDone >= TUTORIAL_AUTO_MATCHES) {
+                                endTutorial();
+                            }
+                        }
 
                         let aliveIndexes = []; hitRing.segments.forEach((seg, idx) => { if(seg.isAlive) aliveIndexes.push(idx); });
                         if(aliveIndexes.length > 0) {
