@@ -28,8 +28,8 @@ jobs:
         with:
           packages: 'platforms;android-35 build-tools;35.0.0 platform-tools'
 
-      - name: Install npm dependencies
-        run: npm install
+      - name: Install npm dependencies (legacy-peer-deps for Game Connect uyumluluk)
+        run: npm install --legacy-peer-deps
 
       - name: Add Android platform if not exists
         run: |
@@ -43,7 +43,6 @@ jobs:
       - name: Update build.gradle for SDK 35
         run: |
           cd android
-          # compileSdkVersion ve targetSdkVersion'u 35 yap
           if [ -f variables.gradle ]; then
             sed -i 's/compileSdkVersion = [0-9]*/compileSdkVersion = 35/' variables.gradle
             sed -i 's/targetSdkVersion = [0-9]*/targetSdkVersion = 35/' variables.gradle
