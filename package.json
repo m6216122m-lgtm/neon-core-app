@@ -1,10 +1,11 @@
 {
-  "name": "neon-core-arcade",
-  "version": "1.0.5",
-  "description": "Neon Core - Ring Shatter Arcade",
-  "main": "index.html",
+  "name": "neon-core",
+  "version": "1.0.0",
+  "description": "Neon Core - Ring shatter arcade game",
+  "main": "index.js",
   "scripts": {
-    "build": "echo Build successful"
+    "build": "echo 'Web build complete'",
+    "sync": "npx cap sync android"
   },
   "dependencies": {
     "@capacitor/android": "^6.1.2",
