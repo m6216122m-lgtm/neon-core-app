@@ -1,17 +1,15 @@
-name: Build Android APK & AAB
+name: Build Android (SDK 35)
 
 on:
-  workflow_dispatch:
   push:
-    branches: [main]
+    branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
   build:
-    name: Build Android Debug APK + Release AAB
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -19,131 +17,80 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Setup Java JDK 17
+      - name: Setup Java 21 (SDK 35 için Java 21 gerekli)
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
 
-      - name: Setup Android SDK
+      - name: Setup Android SDK 35
         uses: android-actions/setup-android@v3
+        with:
+          packages: 'platforms;android-35 build-tools;35.0.0 platform-tools'
 
       - name: Install npm dependencies
         run: npm install
 
-      - name: Add Android platform
-        run: npx cap add android || echo "Already added"
+      - name: Add Android platform if not exists
+        run: |
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
 
-      - name: Sync Capacitor
+      - name: Sync Capacitor (web -> android)
         run: npx cap sync android
 
-      - name: Update Target SDK to 35
-        run: |
-          VARIABLES_FILE="android/variables.gradle"
-          if [ -f "$VARIABLES_FILE" ]; then
-            sed -i "s/targetSdkVersion = .*/targetSdkVersion = 35/" $VARIABLES_FILE
-            sed -i "s/compileSdkVersion = .*/compileSdkVersion = 35/" $VARIABLES_FILE
-            echo "✓ variables.gradle güncellendi: SDK 35"
-          else
-            BUILD_GRADLE="android/app/build.gradle"
-            if [ -f "$BUILD_GRADLE" ]; then
-              sed -i "s/targetSdk .*/targetSdk 35/" $BUILD_GRADLE
-              sed -i "s/compileSdk .*/compileSdk 35/" $BUILD_GRADLE
-              echo "✓ build.gradle güncellendi: SDK 35"
-            fi
-          fi
-
-      - name: Inject AdMob App ID into AndroidManifest
-        run: |
-          APP_ID=$(grep -oP "appId:\s*'\K[^']+" www/config.js | head -1)
-          echo "Detected AdMob App ID: $APP_ID"
-          MANIFEST=android/app/src/main/AndroidManifest.xml
-          if ! grep -q "com.google.android.gms.ads.APPLICATION_ID" $MANIFEST; then
-            sed -i "s|</application>|    <meta-data android:name=\"com.google.android.gms.ads.APPLICATION_ID\" android:value=\"$APP_ID\"/>\n    </application>|" $MANIFEST
-          else
-            sed -i "s|android:name=\"com.google.android.gms.ads.APPLICATION_ID\" android:value=\"[^\"]*\"|android:name=\"com.google.android.gms.ads.APPLICATION_ID\" android:value=\"$APP_ID\"|" $MANIFEST
-          fi
-
-      - name: Build Debug APK (test için)
+      - name: Update build.gradle for SDK 35
         run: |
           cd android
-          chmod +x ./gradlew
-          ./gradlew assembleDebug --no-daemon
-
-      - name: Decode keystore
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-        run: |
-          if [ -z "$KEYSTORE_BASE64" ]; then
-            echo "⚠️ KEYSTORE_BASE64 secret eksik - release AAB üretilmeyecek"
-            echo "RELEASE_ENABLED=false" >> $GITHUB_ENV
-          else
-            mkdir -p android/app
-            echo "$KEYSTORE_BASE64" | base64 -d > android/app/release.jks
-            echo "✓ Keystore decoded to android/app/release.jks"
-            ls -la android/app/release.jks
-            echo "RELEASE_ENABLED=true" >> $GITHUB_ENV
+          # compileSdkVersion ve targetSdkVersion'u 35 yap
+          if [ -f variables.gradle ]; then
+            sed -i 's/compileSdkVersion = [0-9]*/compileSdkVersion = 35/' variables.gradle
+            sed -i 's/targetSdkVersion = [0-9]*/targetSdkVersion = 35/' variables.gradle
+            sed -i 's/minSdkVersion = [0-9]*/minSdkVersion = 22/' variables.gradle
+            cat variables.gradle
           fi
 
-      - name: Build Release AAB (Play Store için - önce imzasız üret)
-        if: env.RELEASE_ENABLED == 'true'
+      - name: Decode keystore from secret
         run: |
-          cd android
-          ./gradlew bundleRelease --no-daemon
+          mkdir -p android/app
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/release.keystore
+          ls -la android/app/release.keystore
+
+      - name: Build APK (debug)
+        working-directory: android
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Build AAB (release, unsigned)
+        working-directory: android
+        run: ./gradlew bundleRelease --stacktrace
 
       - name: Sign AAB with jarsigner
-        if: env.RELEASE_ENABLED == 'true'
-        env:
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          AAB_PATH="android/app/build/outputs/bundle/release/app-release.aab"
-          if [ ! -f "$AAB_PATH" ]; then
-            echo "❌ AAB bulunamadı: $AAB_PATH"
-            ls -la android/app/build/outputs/bundle/release/ || true
+          AAB_FILE=android/app/build/outputs/bundle/release/app-release.aab
+          if [ ! -f "$AAB_FILE" ]; then
+            echo "AAB not found at $AAB_FILE"
+            find android/app/build/outputs -name "*.aab" -type f
             exit 1
           fi
-
-          # Jarsigner ile imzala (AAB için geçerli yöntem)
           jarsigner -verbose \
             -sigalg SHA256withRSA \
             -digestalg SHA-256 \
-            -keystore android/app/release.jks \
-            -storepass "$KEYSTORE_PASSWORD" \
-            -keypass "$KEY_PASSWORD" \
-            "$AAB_PATH" \
-            "$KEY_ALIAS"
+            -keystore android/app/release.keystore \
+            -storepass "${{ secrets.KEYSTORE_PASSWORD }}" \
+            -keypass "${{ secrets.KEY_PASSWORD }}" \
+            "$AAB_FILE" \
+            "${{ secrets.KEY_ALIAS }}"
+          echo "AAB imzalandı"
 
-          # İmzayı doğrula
-          jarsigner -verify -verbose "$AAB_PATH" | tail -20
-          echo "✓ AAB signed successfully"
-
-      - name: Upload Debug APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: neon-core-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 30
+          path: android/app/build/outputs/apk/debug/*.apk
 
-      - name: Upload Release AAB
-        if: env.RELEASE_ENABLED == 'true'
+      - name: Upload signed AAB artifact
         uses: actions/upload-artifact@v4
         with:
           name: neon-core-release-aab
-          path: android/app/build/outputs/bundle/release/app-release.aab
-          retention-days: 30
-
-      - name: Build Summary
-        if: always()
-        run: |
-          echo "## Build Sonucu" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [ -f "android/app/build/outputs/apk/debug/app-debug.apk" ]; then
-            SIZE=$(du -h android/app/build/outputs/apk/debug/app-debug.apk | cut -f1)
-            echo "✅ **Debug APK** ($SIZE) - Artifacts'tan indir" >> $GITHUB_STEP_SUMMARY
-          fi
-          if [ -f "android/app/build/outputs/bundle/release/app-release.aab" ]; then
-            SIZE=$(du -h android/app/build/outputs/bundle/release/app-release.aab | cut -f1)
-            echo "⭐ **Release AAB** ($SIZE) - Play Store'a yükle" >> $GITHUB_STEP_SUMMARY
-          fi
+          path: android/app/build/outputs/bundle/release/*.aab
