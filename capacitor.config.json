@@ -6,6 +6,8 @@
     "androidScheme": "https"
   },
   "android": {
-    "allowMixedContent": false
+    "allowMixedContent": false,
+    "versionCode": 7,
+    "versionName": "1.0.6"
   }
 }
